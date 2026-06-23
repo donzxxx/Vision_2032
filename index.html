@@ -1,0 +1,2508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vision 2032 — Combined Battery of Tests</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0A2342;
+    --aqua: #1A7FA3;
+    --light-aqua: #D6EEF8;
+    --teal: #0E6B7A;
+    --gold: #C8960C;
+    --light-gold: #FDF3DC;
+    --gray-bg: #F4F6F8;
+    --border: #E1E4E8;
+    --text: #1A1A2E;
+    --muted: #555566;
+    --green: #2D8659;
+    --amber: #B7791F;
+    --red: #C53030;
+    --d1: #1A7FA3; /* physical */
+    --d2: #0E6B7A; /* mobility */
+    --d3: #C8960C; /* wattbike */
+    --d4: #2D8659; /* time standards */
+    --d5: #7C2D6B; /* psychology */
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--gray-bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header {
+    background: var(--navy);
+    color: white;
+    padding: 1.25rem 1.5rem;
+    position: sticky; top: 0; z-index: 50;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: 0.3px; }
+  header p { font-size: 0.85rem; opacity: 0.85; margin-top: 2px; }
+  header .crest {
+    display: inline-block; padding: 0.15rem 0.55rem; margin-right: 0.5rem;
+    background: var(--gold); color: var(--navy);
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+    border-radius: 3px; vertical-align: middle;
+  }
+  .container { max-width: 1180px; margin: 0 auto; padding: 1.25rem; }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;
+    background: white; padding: 0.75rem; border-radius: 8px;
+    border: 1px solid var(--border); margin-bottom: 1rem;
+  }
+  .toolbar input[type="text"], .toolbar input[type="number"], .toolbar select {
+    flex: 1; min-width: 130px; padding: 0.55rem 0.75rem;
+    border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem;
+    background: white;
+  }
+  .toolbar input[type="text"] { flex: 2; min-width: 180px; }
+  button {
+    padding: 0.55rem 1rem; border-radius: 6px; border: 1px solid var(--border);
+    background: white; cursor: pointer; font-size: 0.9rem; font-weight: 500;
+    transition: all 0.15s;
+  }
+  button:hover { background: var(--gray-bg); }
+  button.primary { background: var(--aqua); color: white; border-color: var(--aqua); }
+  button.primary:hover { background: var(--teal); border-color: var(--teal); }
+  button.danger { color: var(--red); border-color: #F4C7C7; }
+  button.danger:hover { background: #FEF1F1; }
+  button.gold { background: var(--gold); color: white; border-color: var(--gold); }
+  button.gold:hover { background: #A87E0A; }
+
+  /* Roster */
+  .roster {
+    background: white; border: 1px solid var(--border); border-radius: 8px;
+    margin-bottom: 1rem; overflow: hidden;
+  }
+  .roster-header {
+    padding: 0.75rem 1rem; background: var(--gray-bg);
+    font-size: 0.85rem; font-weight: 600; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .athlete-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto auto;
+    gap: 0.5rem; align-items: center;
+    padding: 0.6rem 1rem; border-bottom: 1px solid var(--border);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .athlete-row:last-child { border-bottom: none; }
+  .athlete-row:hover { background: var(--gray-bg); }
+  .athlete-row.active { background: var(--light-aqua); }
+  .athlete-row .name { font-weight: 500; }
+  .athlete-row .meta { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+  .athlete-row .total-pill {
+    background: var(--navy); color: white;
+    padding: 0.2rem 0.55rem; border-radius: 12px;
+    font-size: 0.78rem; font-weight: 600; font-variant-numeric: tabular-nums;
+  }
+  .athlete-row .total-pill.elite { background: var(--green); }
+  .athlete-row .total-pill.dev { background: var(--amber); }
+  .athlete-row .total-pill.low { background: var(--red); }
+  .athlete-row .total-pill.empty { background: var(--muted); }
+  .athlete-row .x-btn {
+    background: none; border: none; color: var(--muted);
+    font-size: 1.1rem; padding: 0.2rem 0.5rem; border-radius: 4px;
+  }
+  .athlete-row .x-btn:hover { background: #FEF1F1; color: var(--red); }
+  .empty-roster {
+    padding: 2rem; text-align: center; color: var(--muted); font-size: 0.9rem;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 2px; margin-bottom: 0;
+    background: var(--gray-bg); border-radius: 8px 8px 0 0;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-bottom: none;
+  }
+  .tab {
+    padding: 0.75rem 1.1rem; cursor: pointer;
+    border: none; background: transparent;
+    border-radius: 0;
+    font-size: 0.88rem; font-weight: 600; color: var(--muted);
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  .tab.active {
+    color: var(--navy);
+    background: white;
+    border-bottom-color: var(--gold);
+  }
+  .tab:hover:not(.active) { color: var(--text); background: rgba(255,255,255,0.5); }
+  .tab .domain-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    margin-right: 0.4rem; vertical-align: middle;
+  }
+  .tab[data-tab="b1"] .domain-dot { background: var(--d1); }
+  .tab[data-tab="b2"] .domain-dot { background: var(--d2); }
+  .tab[data-tab="b3"] .domain-dot { background: var(--d3); }
+  .tab[data-tab="b4"] .domain-dot { background: var(--d4); }
+  .tab[data-tab="b5"] .domain-dot { background: var(--d5); }
+  .tab[data-tab="summary"] .domain-dot { background: var(--navy); }
+
+  .tab-content {
+    background: white;
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .hidden { display: none !important; }
+
+  /* Score header per domain */
+  .domain-head {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--gray-bg);
+  }
+  .domain-head h2 { font-size: 1.2rem; color: var(--navy); font-weight: 700; }
+  .domain-head .sub { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+  .domain-head .score-box {
+    text-align: right; font-variant-numeric: tabular-nums;
+  }
+  .domain-head .score-box .raw {
+    font-size: 1.8rem; font-weight: 700; color: var(--navy);
+    line-height: 1;
+  }
+  .domain-head .score-box .raw small { font-size: 0.55em; color: var(--muted); font-weight: 500; }
+  .domain-head .score-box .pct {
+    font-size: 0.85rem; color: var(--muted); margin-top: 2px;
+    font-weight: 600;
+  }
+
+  /* Test cards */
+  .test-card {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 1rem; margin-bottom: 0.85rem;
+    background: white;
+  }
+  .test-card-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 1rem; margin-bottom: 0.6rem;
+  }
+  .test-card-head .name { font-weight: 600; font-size: 1rem; }
+  .test-card-head .param { color: var(--muted); font-size: 0.83rem; margin-top: 1px; }
+  .test-card-head .score-tag {
+    font-size: 0.78rem; font-weight: 700; padding: 0.25rem 0.55rem;
+    border-radius: 4px; background: var(--gray-bg); color: var(--muted);
+    white-space: nowrap; font-variant-numeric: tabular-nums;
+  }
+  .test-card-head .score-tag.s-3, .test-card-head .score-tag.s-4 { background: #D4F4DD; color: #1F6841; }
+  .test-card-head .score-tag.s-2 { background: #E4F1DC; color: #4A7A2C; }
+  .test-card-head .score-tag.s-1 { background: var(--light-gold); color: var(--amber); }
+  .test-card-head .score-tag.s-0 { background: #FED7D7; color: var(--red); }
+  .test-card .info {
+    font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem;
+    padding: 0.5rem 0.7rem; background: var(--gray-bg); border-radius: 4px;
+    border-left: 3px solid var(--border);
+  }
+  .test-card .info strong { color: var(--text); }
+
+  /* Inputs in tests */
+  .input-row {
+    display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center;
+    margin-top: 0.4rem;
+  }
+  .input-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
+  .input-group label { font-size: 0.78rem; color: var(--muted); font-weight: 600; }
+  .input-group input, .input-group select {
+    padding: 0.5rem 0.65rem; border: 1px solid var(--border); border-radius: 5px;
+    font-size: 0.95rem; background: white;
+  }
+  .input-group input:focus, .input-group select:focus {
+    outline: 2px solid var(--aqua); border-color: var(--aqua);
+  }
+  .check-row {
+    display: flex; gap: 0.4rem; align-items: center; margin-top: 0.5rem;
+    font-size: 0.85rem; color: var(--muted);
+  }
+  .check-row input[type="checkbox"] { width: 16px; height: 16px; }
+
+  /* Bilateral input grid (mobility) */
+  .bilat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+  }
+  .bilat-grid label {
+    display: block;
+    font-size: 0.78rem; color: var(--muted); font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  /* Wattbike splits grid */
+  .splits-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+  }
+  .split-cell {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 0.6rem 0.3rem;
+    border: 1px solid var(--border); border-radius: 6px;
+    background: var(--gray-bg);
+  }
+  .split-cell .minute-tag {
+    font-size: 0.65rem; color: var(--muted); font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .split-cell .minute-num {
+    font-size: 1.3rem; font-weight: 700; color: var(--navy);
+    line-height: 1; margin: 0.15rem 0 0.4rem;
+  }
+  .split-cell input {
+    width: 100%; text-align: center;
+    padding: 0.35rem; border: 1px solid var(--border); border-radius: 4px;
+    font-size: 0.9rem; font-variant-numeric: tabular-nums;
+    background: white;
+  }
+  .split-cell .unit { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+  /* Power pattern result */
+  .pattern-result {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.9rem 1rem;
+    border-radius: 8px;
+    margin-top: 0.6rem;
+    border: 1px solid var(--border);
+  }
+  .pattern-badge {
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
+    padding: 0.4rem 0.7rem;
+    border-radius: 4px;
+    text-align: center;
+    min-width: 90px;
+  }
+  .pattern-badge.GREEN { background: #1F6841; color: white; }
+  .pattern-badge.AMBER { background: var(--gold); color: white; }
+  .pattern-badge.BLACK { background: #1A1A2E; color: white; }
+  .pattern-badge.RED   { background: var(--red); color: white; }
+  .pattern-badge.PENDING { background: var(--gray-bg); color: var(--muted); }
+  .pattern-result .interp { font-size: 0.85rem; color: var(--text); line-height: 1.5; }
+  .pattern-stats {
+    display: flex; gap: 1.25rem; margin-top: 0.4rem;
+    font-size: 0.78rem; color: var(--muted);
+    font-family: ui-monospace, monospace;
+  }
+
+  /* Psychology grid */
+  .psych-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    padding: 0.85rem; border-bottom: 1px solid var(--border);
+  }
+  .psych-row:last-child { border-bottom: none; }
+  .psych-row .domain-title { font-weight: 700; color: var(--navy); font-size: 0.98rem; }
+  .psych-row .questions {
+    font-size: 0.85rem; color: var(--text); line-height: 1.55;
+    padding: 0.5rem 0.7rem; background: #FAF7EE; border-left: 3px solid var(--gold);
+    border-radius: 0 4px 4px 0;
+  }
+  .psych-row .questions div { margin-bottom: 0.3rem; }
+  .psych-row .questions div:last-child { margin-bottom: 0; }
+  .dimensions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .dim-cell {
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.55rem;
+    background: var(--gray-bg);
+  }
+  .dim-cell label {
+    display: block; font-size: 0.75rem; font-weight: 700;
+    color: var(--muted); margin-bottom: 0.35rem;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .dim-cell select {
+    width: 100%; padding: 0.4rem;
+    border: 1px solid var(--border); border-radius: 4px;
+    background: white; font-size: 0.85rem;
+  }
+
+  /* Time standards table */
+  .events-table {
+    width: 100%; border-collapse: collapse;
+    background: white; border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+  }
+  .events-table th {
+    background: var(--navy); color: white;
+    text-align: left; padding: 0.7rem 0.85rem;
+    font-size: 0.83rem; font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .events-table th.r, .events-table td.r { text-align: right; }
+  .events-table td {
+    padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--border);
+    font-size: 0.9rem; font-variant-numeric: tabular-nums;
+  }
+  .events-table tr:last-child td { border-bottom: none; }
+  .events-table input {
+    width: 100%; padding: 0.4rem 0.5rem;
+    border: 1px solid var(--border); border-radius: 4px;
+    font-size: 0.92rem; font-variant-numeric: tabular-nums;
+    background: white; text-align: right;
+  }
+  .events-table .delta-pos { color: var(--red); }
+  .events-table .delta-neg { color: var(--green); }
+  .events-table .pill {
+    display: inline-block; padding: 0.2rem 0.5rem; border-radius: 12px;
+    font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+  .events-table .pill.s-2 { background: #D4F4DD; color: #1F6841; }
+  .events-table .pill.s-1 { background: var(--light-gold); color: var(--amber); }
+  .events-table .pill.s-0 { background: #FED7D7; color: var(--red); }
+  .events-table .pill.s-x { background: var(--gray-bg); color: var(--muted); }
+
+  /* Summary tab */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  @media (max-width: 760px) { .summary-grid { grid-template-columns: 1fr; } }
+  .summary-card {
+    background: white; border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.25rem;
+  }
+  .summary-card h3 {
+    font-size: 1rem; color: var(--navy);
+    margin-bottom: 0.75rem; font-weight: 700;
+  }
+  .composite-box {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--aqua) 100%);
+    color: white; padding: 1.25rem;
+    border-radius: 10px; margin-bottom: 1.25rem;
+  }
+  .composite-box .label {
+    font-size: 0.78rem; letter-spacing: 0.1em;
+    text-transform: uppercase; opacity: 0.85;
+  }
+  .composite-box .value {
+    font-size: 2.6rem; font-weight: 800; line-height: 1;
+    margin: 0.4rem 0; font-variant-numeric: tabular-nums;
+  }
+  .composite-box .value small { font-size: 0.45em; opacity: 0.85; font-weight: 600; }
+  .composite-box .verdict {
+    font-size: 0.95rem; margin-top: 0.5rem;
+    background: rgba(255,255,255,0.15);
+    padding: 0.5rem 0.8rem; border-radius: 6px;
+    display: inline-block;
+  }
+
+  .domain-bars { display: flex; flex-direction: column; gap: 0.6rem; }
+  .domain-bar {
+    display: grid;
+    grid-template-columns: 110px 1fr 90px;
+    gap: 0.6rem; align-items: center;
+    font-size: 0.85rem;
+  }
+  .domain-bar .lbl { font-weight: 600; color: var(--text); }
+  .domain-bar .bar-track {
+    height: 10px; background: var(--gray-bg);
+    border-radius: 6px; overflow: hidden;
+    position: relative;
+  }
+  .domain-bar .bar-fill {
+    height: 100%; border-radius: 6px;
+    transition: width 0.3s;
+  }
+  .domain-bar .val {
+    text-align: right; font-variant-numeric: tabular-nums;
+    color: var(--muted); font-weight: 600;
+  }
+
+  /* Spider chart container */
+  .spider-container {
+    display: flex; justify-content: center; align-items: center;
+    padding: 0.5rem;
+  }
+  #spiderChart {
+    width: 100%; max-width: 420px; height: auto;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 1rem;
+  }
+  .modal {
+    background: white; border-radius: 10px;
+    padding: 1.5rem; max-width: 460px; width: 100%;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+  }
+  .modal h3 { margin-bottom: 1rem; color: var(--navy); }
+  .modal .input-group { margin-bottom: 0.85rem; }
+  .modal .actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; }
+
+  /* No athlete prompt */
+  .no-athlete {
+    padding: 3rem 1rem; text-align: center; color: var(--muted);
+    background: white; border: 1px dashed var(--border);
+    border-radius: 8px;
+  }
+  .no-athlete h2 { color: var(--text); font-size: 1.15rem; margin-bottom: 0.4rem; }
+
+  /* Notes textarea */
+  .notes-area {
+    width: 100%; min-height: 80px; padding: 0.6rem;
+    border: 1px solid var(--border); border-radius: 6px;
+    font-size: 0.9rem; font-family: inherit; resize: vertical;
+    margin-top: 0.5rem;
+  }
+  .notes-label {
+    font-size: 0.8rem; color: var(--muted); font-weight: 600;
+    margin-top: 0.75rem;
+  }
+
+  @media (max-width: 640px) {
+    .container { padding: 0.75rem; }
+    .athlete-row { grid-template-columns: 1fr auto auto; font-size: 0.88rem; }
+    .domain-head { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    .splits-grid { grid-template-columns: repeat(3, 1fr); }
+    .dimensions-grid { grid-template-columns: 1fr; }
+    .bilat-grid { grid-template-columns: 1fr; }
+    .tab { padding: 0.65rem 0.85rem; font-size: 0.82rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span class="crest">SAQ</span>Vision 2032 — Combined Battery of Tests</h1>
+  <p>Talent ID composite · Physical · Mobility · Wattbike · Time Standards · Psychology</p>
+</header>
+
+<div class="container">
+
+  <!-- Roster toolbar -->
+  <div class="toolbar">
+    <button class="primary" onclick="openAddModal()">+ Add athlete</button>
+    <button onclick="exportAllJSON()">Export JSON</button>
+    <button onclick="document.getElementById('importFile').click()">Import JSON</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+    <button class="danger" onclick="confirmClearAll()">Clear all</button>
+    <span style="flex:1"></span>
+    <span style="font-size:0.8rem; color:var(--muted);">Roster: <strong id="athlete-count">0</strong></span>
+  </div>
+
+  <!-- Roster list -->
+  <div class="roster">
+    <div class="roster-header">
+      <span>Athletes</span>
+      <span>Tap a name to load their scorecard</span>
+    </div>
+    <div id="roster-list"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-tab="summary" onclick="switchTab('summary')"><span class="domain-dot"></span>Summary & Spider</button>
+    <button class="tab" data-tab="b1" onclick="switchTab('b1')"><span class="domain-dot"></span>1 · Physical</button>
+    <button class="tab" data-tab="b2" onclick="switchTab('b2')"><span class="domain-dot"></span>2 · Mobility</button>
+    <button class="tab" data-tab="b3" onclick="switchTab('b3')"><span class="domain-dot"></span>3 · Wattbike</button>
+    <button class="tab" data-tab="b4" onclick="switchTab('b4')"><span class="domain-dot"></span>4 · Time Standards</button>
+    <button class="tab" data-tab="b5" onclick="switchTab('b5')"><span class="domain-dot"></span>5 · Psychology</button>
+  </div>
+
+  <div class="tab-content" id="tab-pane">
+    <div class="no-athlete" id="no-athlete-msg">
+      <h2>No athlete selected</h2>
+      <p>Add an athlete or tap one in the roster to begin scoring.</p>
+    </div>
+    <div id="active-content" style="display:none"></div>
+  </div>
+
+</div>
+
+<!-- Add athlete modal -->
+<div class="modal-overlay hidden" id="addModal">
+  <div class="modal">
+    <h3>Add athlete</h3>
+    <div class="input-group">
+      <label>Name</label>
+      <input type="text" id="m-name" placeholder="Full name">
+    </div>
+    <div class="input-row">
+      <div class="input-group">
+        <label>Gender</label>
+        <select id="m-gender"><option value="M">Boy</option><option value="F">Girl</option></select>
+      </div>
+      <div class="input-group">
+        <label>Age (12–14)</label>
+        <input type="number" id="m-age" min="11" max="16" placeholder="13">
+      </div>
+    </div>
+    <div class="input-group">
+      <label>School / club (optional)</label>
+      <input type="text" id="m-school" placeholder="e.g. SSP">
+    </div>
+    <div class="input-group">
+      <label>Test date (optional)</label>
+      <input type="text" id="m-date" placeholder="2026-05-20">
+    </div>
+    <div class="actions">
+      <button onclick="closeAddModal()">Cancel</button>
+      <button class="primary" onclick="addAthleteFromModal()">Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+   VISION 2032 — COMBINED BATTERY OF TESTS
+   Unified scorecard merging:
+     B1: Physical talent ID (max 15)
+     B2: Mobility screen (max 16: 8 tests × 2)
+     B3: Wattbike 6-min pacing (score 1-4)
+     B4: Time standards (max 10: 5 events × 2)
+     B5: Psychology phase 2 (max 30: 5 domains × 3 dimensions × 2)
+============================================================================ */
+
+// ============================================================================
+// B1: PHYSICAL TALENT ID TESTS (from talent-id-scorecard.html)
+// ============================================================================
+const B1_TESTS = [
+  { id: 'sit_stand', name: 'Sitting:Standing height ratio', param: 'Torso to lower limb ratio',
+    type: 'numeric',
+    unscored: true,
+    fields: [
+      { id: 'standing', label: 'Standing height (cm)', placeholder: 'e.g. 145' },
+      { id: 'sitting', label: 'Sitting height (cm)', placeholder: 'e.g. 75' }
+    ],
+    score: () => null,
+    info: 'Anthropometric marker. Lower ratio (longer legs) favours sprint freestyle; higher ratio (longer torso) suits breaststroke. Not scored.' },
+  { id: 'overhead_squat', name: 'Overhead squat', param: 'Lower body mobility',
+    type: 'select',
+    options: [{ value: 2, label: '2 — No errors' }, { value: 1, label: '1 — <2 errors' }, { value: 0, label: '0 — >2 errors' }],
+    score: v => v,
+    info: '<strong>2</strong> = no errors · <strong>1</strong> = <2 errors · <strong>0</strong> = >2 errors' },
+  { id: 'shoulder', name: 'Shoulder mobility test', param: 'Mobility',
+    type: 'select',
+    options: [{ value: 2, label: '2 — Hands in contact' }, { value: 1, label: '1 — Slightly apart' }, { value: 0, label: '0 — Far apart' }],
+    score: v => v,
+    info: '<strong>2</strong> = hands in contact · <strong>1</strong> = slightly apart · <strong>0</strong> = far apart' },
+  { id: 'ruler', name: 'Ruler test', param: 'Spine structure',
+    type: 'select',
+    options: [{ value: 2, label: '2 — Ruler does not go through' }, { value: 1, label: '1 — Partially' }, { value: 0, label: '0 — Completely through' }],
+    score: v => v,
+    info: '<strong>2</strong> = does not pass · <strong>1</strong> = partially · <strong>0</strong> = completely' },
+  { id: 'broad_jump', name: 'Standing broad jump', param: 'Lower body power',
+    type: 'numeric',
+    fields: [{ id: 'distance', label: 'Jump distance (m)', placeholder: 'e.g. 1.6', step: '0.01' }],
+    score: v => { const d = v.distance; if (d == null || isNaN(d)) return null; if (d > 1.5) return 2; if (d >= 1.0) return 1; return 0; },
+    info: '<strong>2</strong> = >1.5m · <strong>1</strong> = 1.0–1.5m · <strong>0</strong> = <1.0m' },
+  { id: 'situp', name: 'Sit up test', param: 'Core endurance',
+    type: 'numeric',
+    fields: [{ id: 'count', label: 'Sit-up count', placeholder: 'e.g. 18' }],
+    score: v => { const c = v.count; if (c == null || isNaN(c)) return null; if (c > 20) return 2; if (c >= 11) return 1; return 0; },
+    info: '<strong>2</strong> = >20 · <strong>1</strong> = 11–20 · <strong>0</strong> = <10' },
+  { id: 'hang', name: 'Hanging bar test', param: 'Upper body strength',
+    type: 'numeric',
+    fields: [{ id: 'seconds', label: 'Hang time (sec)', placeholder: 'e.g. 35' }],
+    score: v => { const s = v.seconds; if (s == null || isNaN(s)) return null; if (s > 60) return 2; if (s >= 20) return 1; return 0; },
+    info: '<strong>2</strong> = >60 sec · <strong>1</strong> = 20–60 sec · <strong>0</strong> = <20 sec' },
+  { id: 'swim25', name: '25m Swim', param: 'Swimming ability',
+    type: 'numeric',
+    fields: [{ id: 'time', label: '25m time (sec)', placeholder: 'e.g. 18.5', step: '0.1' }],
+    score: v => { if (v.cannot) return 0; const t = v.time; if (t == null || isNaN(t)) return null; if (t <= 15) return 3; if (t <= 20) return 2; if (t >= 21) return 1; return 2; },
+    info: '<strong>3</strong> = 10–15 sec · <strong>2</strong> = 16–20 sec · <strong>1</strong> = ≥21 sec · <strong>0</strong> = cannot swim 25m',
+    hasCannotFlag: true }
+];
+const B1_MAX = 15;
+
+// ============================================================================
+// B2: MOBILITY SCREEN (from Updated_version_of_mobility_.html)
+// 8 bilateral tests. Each side scored 0 or 2. Max per test = 4 (L+R).
+// Combined: 8 × 4 = 32 raw. We display as percentage-normalised to keep scale comparable.
+// ============================================================================
+const B2_TESTS = [
+  { id: 'shoulderAbdIR', label: 'Shoulder Abd + IR', unit: '°', score: v => v >= 125 ? 2 : 0, asym: 10 },
+  { id: 'combinedElevation', label: 'Combined Elevation', unit: '°', score: v => v >= 30 ? 2 : 0, asym: 5 },
+  { id: 'shoulderER', label: 'Shoulder ER', unit: '°', score: v => v >= 100 ? 2 : 0, asym: 10 },
+  { id: 'shoulderIR', label: 'Shoulder IR', unit: '°', score: v => v >= 50 ? 2 : 0, asym: 10 },
+  { id: 'thomas', label: 'Modified Thomas', unit: '°', score: v => v >= 0 ? 2 : 0, asym: 10 },
+  { id: 'ankleVisual', label: 'Ankle Plantar Flexion', unit: '0–2', score: v => v === 2 ? 2 : 0, asym: 2, isPassFail: true },
+  { id: 'wallAngel', label: 'Seated Wall Angel', unit: '/3', score: v => v >= 2 ? 2 : 0, asym: 1 },
+  { id: 'tSpineRot', label: 'Lumbar-Locked T-Spine Rotation', unit: '°', score: v => v >= 40 ? 2 : 0, asym: 10 }
+];
+const B2_MAX = B2_TESTS.length * 4; // 8 × 4 = 32 (both sides scored)
+
+// ============================================================================
+// B3: WATTBIKE 6-MINUTE PACING (from wattbike scorecard)
+// Scores: GREEN=4, AMBER=3, BLACK=2, RED=1. We treat 4 as max.
+// ============================================================================
+const B3_MAX = 4;
+
+// ============================================================================
+// B4: TIME STANDARDS (from time_standard_scorecard.html)
+// 5 events × 2 = 10 max
+// ============================================================================
+const TIME_STANDARDS = {
+  boys: {
+    14: { "200 Freestyle":"2:05.60","200 Backstroke":"2:27.30","200 Breaststroke":"2:35.74","200 Butterfly":"2:19.72","200 IM":"2:28.20" },
+    13: { "200 Freestyle":"2:21.70","200 Backstroke":"2:34.30","200 Breaststroke":"2:47.80","200 Butterfly":"2:24.99","200 IM":"2:34.70" },
+    12: { "200 Freestyle":"2:25.54","200 Backstroke":"2:38.16","200 Breaststroke":"2:54.73","200 Butterfly":"2:33.10","200 IM":"2:36.25" }
+  },
+  girls: {
+    14: { "200 Freestyle":"2:23.06","200 Backstroke":"2:30.54","200 Breaststroke":"2:55.50","200 Butterfly":"2:35.00","200 IM":"2:34.94" },
+    13: { "200 Freestyle":"2:27.70","200 Backstroke":"2:35.92","200 Breaststroke":"2:59.10","200 Butterfly":"2:39.50","200 IM":"2:39.79" },
+    12: { "200 Freestyle":"2:31.07","200 Backstroke":"2:39.88","200 Breaststroke":"3:02.74","200 Butterfly":"2:43.30","200 IM":"2:41.95" }
+  }
+};
+const B4_EVENTS = ["200 Freestyle","200 Backstroke","200 Breaststroke","200 Butterfly","200 IM"];
+const B4_DEV_PCT = 2.0; // deviation band
+const B4_MAX = B4_EVENTS.length * 2; // 10
+
+// ============================================================================
+// B5: PSYCHOLOGY PHASE 2 (from psych-phase2-scorecard.html)
+// 5 domains × 3 dimensions × 2 = 30 max
+// ============================================================================
+const B5_DOMAINS = [
+  { id: 'd1', title: 'Process Memory and Engagement',
+    primary: '"Tell me about your last bad practice. What happened? Walk me through it."',
+    probe: '"What did you do during the bad parts? What were you thinking?"',
+    final: '"What did Coach do or say? What did you do after the session ended?"' },
+  { id: 'd2', title: 'Self-Regulation Under Load',
+    primary: '"When swimming gets really hard in a race — say the last 50 of a 200 — what do you actually think about?"',
+    probe: '"Do you have any tricks or things you say to yourself? Where did you learn that?"',
+    final: '"What about when warm-up feels bad? What do you do?"' },
+  { id: 'd3', title: 'Coachability and Honesty',
+    primary: '"Tell me about something Coach told you recently that you didn\'t agree with."',
+    probe: '"What did you do with that feedback? What did you actually try?"',
+    final: '"If a coach told you something you really thought was wrong, what would you do?"' },
+  { id: 'd4', title: 'Agency and Ownership',
+    primary: '"If you missed a week of training because you were sick, what would you do when you came back?"',
+    probe: '"Who decides you\'re going to training each day — you, your parents, or someone else?"',
+    final: '"What would you change about your training if you could?"' },
+  { id: 'd5', title: 'Identity Resilience and Perspective',
+    primary: '"What would you do if you weren\'t selected for this squad?"',
+    probe: '"What would you do if you couldn\'t swim for a year — say a long injury?"',
+    final: '"What do you like doing that has nothing to do with swimming?"' }
+];
+const B5_DIMENSIONS = [
+  { id: 'spec', name: 'Specificity' },
+  { id: 'aware', name: 'Self-awareness' },
+  { id: 'agency', name: 'Agency' }
+];
+const B5_ANCHORS = {
+  2: 'Above age expectation',
+  1: 'Age-appropriate',
+  0: 'Below age expectation'
+};
+const B5_MAX = B5_DOMAINS.length * B5_DIMENSIONS.length * 2; // 30
+
+// ============================================================================
+// COMPOSITE — equal weights per domain (normalised %)
+// Final composite = average of 5 domain percentages → /100
+// ============================================================================
+const DOMAIN_META = [
+  { key: 'b1', label: 'Physical',       short: 'Phys',   color: '#1A7FA3' },
+  { key: 'b2', label: 'Mobility',       short: 'Mob',    color: '#0E6B7A' },
+  { key: 'b3', label: 'Wattbike',       short: 'Watt',   color: '#C8960C' },
+  { key: 'b4', label: 'Time Stds',      short: 'Time',   color: '#2D8659' },
+  { key: 'b5', label: 'Psychology',     short: 'Psych',  color: '#7C2D6B' }
+];
+
+// ============================================================================
+// STATE
+// ============================================================================
+let state = {
+  athletes: [],
+  activeId: null,
+  activeTab: 'summary'
+};
+let nextId = 1;
+const STORAGE_KEY = 'vision2032_battery_v1';
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const d = JSON.parse(saved);
+      state = d.state || state;
+      nextId = d.nextId || 1;
+    }
+  } catch(e) { console.warn('Load failed', e); }
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, nextId })); }
+  catch(e) { console.warn('Save failed', e); }
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function newAthlete(name, gender, age, school, date) {
+  return {
+    id: nextId++,
+    name, gender, age, school: school || '', testDate: date || '',
+    b1: {},  // { test_id: { value/standing/sitting/etc, cannot } }
+    b2: {},  // { test_id: { left, right } }
+    b3: { powers: [null,null,null,null,null,null] },
+    b4: {},  // { event_name: "M:SS.ss" }
+    b5: {},  // { d1_spec: 0|1|2, d1_aware: ..., d1_agency: ..., d1_notes: ... }
+    notes: ''
+  };
+}
+
+/* ----------------------------------------------------------------------------
+   B1 SCORING
+---------------------------------------------------------------------------- */
+function b1TestScore(athlete, test) {
+  const r = athlete.b1[test.id];
+  if (!r) return null;
+  if (test.type === 'select') {
+    if (r.value == null || r.value === '') return null;
+    return test.score(parseInt(r.value, 10));
+  } else {
+    const numbers = {};
+    let hasAny = false;
+    for (const f of test.fields) {
+      if (r[f.id] != null && r[f.id] !== '') {
+        const n = parseFloat(r[f.id]);
+        if (!isNaN(n)) { numbers[f.id] = n; hasAny = true; }
+      }
+    }
+    if (test.hasCannotFlag && r.cannot) return test.score({ cannot: true });
+    if (!hasAny) return null;
+    return test.score(numbers);
+  }
+}
+function b1Total(athlete) {
+  let total = 0, count = 0;
+  for (const t of B1_TESTS) {
+    if (t.unscored) continue;
+    const s = b1TestScore(athlete, t);
+    if (s !== null) { total += s; count++; }
+  }
+  return { total, count, max: B1_MAX };
+}
+
+/* ----------------------------------------------------------------------------
+   B2 SCORING — Mobility (bilateral; both sides count)
+---------------------------------------------------------------------------- */
+function b2TestSideScore(test, val) {
+  if (val == null || val === '') return null;
+  const n = parseFloat(val);
+  if (isNaN(n)) return null;
+  return test.score(n);
+}
+function b2Total(athlete) {
+  let total = 0, max = 0;
+  for (const t of B2_TESTS) {
+    const r = athlete.b2[t.id] || {};
+    const left = b2TestSideScore(t, r.left);
+    const right = b2TestSideScore(t, r.right);
+    if (left !== null) { total += left; max += 2; }
+    if (right !== null) { total += right; max += 2; }
+  }
+  return { total, max, scoredMax: B2_MAX };
+}
+
+/* ----------------------------------------------------------------------------
+   B3 SCORING — Wattbike pattern
+---------------------------------------------------------------------------- */
+function b3Classify(rawPowers) {
+  // coerce strings → numbers; treat empty/invalid as null
+  const powers = rawPowers.map(p => {
+    if (p === null || p === undefined || p === '') return null;
+    const n = parseFloat(p);
+    return isNaN(n) ? null : n;
+  });
+  const valid = powers.every(p => p !== null && p >= 0);
+  if (!valid) return { complete: false };
+  const n = powers.length;
+  const mean = powers.reduce((a,b) => a+b, 0) / n;
+  if (mean === 0) return { complete: false };
+  const variance = powers.reduce((acc,p) => acc + (p-mean)**2, 0) / n;
+  const sd = Math.sqrt(variance);
+  const cv = (sd / mean) * 100;
+  const xs = [1,2,3,4,5,6]; const meanX = 3.5;
+  let num = 0, den = 0;
+  for (let i=0;i<n;i++) { num += (xs[i]-meanX)*(powers[i]-mean); den += (xs[i]-meanX)**2; }
+  const slope = num / den;
+  const slopePct = (slope / mean) * 100;
+  let pattern, score, interp;
+  if (cv <= 10 && Math.abs(slopePct) < 2) {
+    pattern = 'AMBER'; score = 3;
+    interp = 'Steady aerobic ceiling — strong self-regulation for 12–14 age bracket.';
+  } else if (slopePct >= 2) {
+    pattern = 'GREEN'; score = 4;
+    interp = 'Power building progressively. Strongest positive signal — excellent aerobic control with capacity in reserve.';
+  } else if (slopePct <= -2) {
+    pattern = 'RED'; score = 1;
+    interp = 'Power fades. Glycolytic overreach — set out too hard. Pacing education and re-test recommended.';
+  } else {
+    pattern = 'BLACK'; score = 2;
+    interp = 'No consistent power pattern. Metabolic self-regulation still developing. Flag for re-test in 8–12 weeks.';
+  }
+  return { complete: true, pattern, score, interp, mean, cv, slope, slopePct };
+}
+function b3Total(athlete) {
+  const r = b3Classify(athlete.b3.powers || []);
+  return r.complete ? { score: r.score, pattern: r.pattern, max: B3_MAX } : { score: null, pattern: null, max: B3_MAX };
+}
+
+/* ----------------------------------------------------------------------------
+   B4 SCORING — Time standards
+---------------------------------------------------------------------------- */
+function timeToSeconds(t) {
+  if (!t) return null;
+  t = String(t).trim();
+  if (t.includes(':')) {
+    const [m,s] = t.split(':');
+    const mins = parseInt(m,10), secs = parseFloat(s);
+    if (isNaN(mins) || isNaN(secs)) return null;
+    return mins*60 + secs;
+  }
+  const secs = parseFloat(t);
+  return isNaN(secs) ? null : secs;
+}
+function secondsToTime(s) {
+  if (s === null || isNaN(s)) return '—';
+  const sign = s<0 ? '-' : '';
+  s = Math.abs(s);
+  const m = Math.floor(s/60);
+  const rem = s - m*60;
+  return `${sign}${m}:${rem.toFixed(2).padStart(5,'0')}`;
+}
+function b4EventStandard(athlete, event) {
+  if (!athlete.age) return null;
+  const key = athlete.gender === 'M' ? 'boys' : 'girls';
+  const ageMap = TIME_STANDARDS[key];
+  const a = Math.min(14, Math.max(12, athlete.age));
+  const stdStr = ageMap[a] ? ageMap[a][event] : null;
+  return stdStr ? timeToSeconds(stdStr) : null;
+}
+function b4ScoreEvent(athlete, event) {
+  const std = b4EventStandard(athlete, event);
+  const actual = timeToSeconds(athlete.b4[event]);
+  if (std === null || actual === null) return null;
+  const dev = std * (B4_DEV_PCT / 100);
+  const delta = actual - std;
+  if (delta <= dev) return 2;
+  if (delta <= 2*dev) return 1;
+  return 0;
+}
+function b4Total(athlete) {
+  let total = 0, count = 0;
+  for (const e of B4_EVENTS) {
+    const s = b4ScoreEvent(athlete, e);
+    if (s !== null) { total += s; count++; }
+  }
+  return { total, count, max: B4_MAX };
+}
+
+/* ----------------------------------------------------------------------------
+   B5 SCORING — Psychology
+---------------------------------------------------------------------------- */
+function b5Total(athlete) {
+  let total = 0, answered = 0;
+  for (const d of B5_DOMAINS) {
+    for (const dim of B5_DIMENSIONS) {
+      const key = `${d.id}_${dim.id}`;
+      const v = athlete.b5[key];
+      if (v !== undefined && v !== null && v !== '') {
+        total += parseInt(v, 10);
+        answered++;
+      }
+    }
+  }
+  return { total, answered, max: B5_MAX };
+}
+
+/* ----------------------------------------------------------------------------
+   COMPOSITE — % per domain, then average
+---------------------------------------------------------------------------- */
+function domainPct(athlete, key) {
+  switch(key) {
+    case 'b1': { const t = b1Total(athlete); return t.count === 0 ? null : (t.total / t.max) * 100; }
+    case 'b2': { const t = b2Total(athlete); return t.max === 0 ? null : (t.total / B2_MAX) * 100; }
+    case 'b3': { const t = b3Total(athlete); return t.score === null ? null : (t.score / t.max) * 100; }
+    case 'b4': { const t = b4Total(athlete); return t.count === 0 ? null : (t.total / t.max) * 100; }
+    case 'b5': { const t = b5Total(athlete); return t.answered === 0 ? null : (t.total / t.max) * 100; }
+  }
+  return null;
+}
+function compositeScore(athlete) {
+  const pcts = DOMAIN_META.map(d => domainPct(athlete, d.key));
+  const valid = pcts.filter(p => p !== null);
+  if (valid.length === 0) return { pct: null, completed: 0 };
+  return {
+    pct: valid.reduce((a,b) => a+b, 0) / valid.length,
+    completed: valid.length,
+    perDomain: pcts
+  };
+}
+function compositeRating(pct) {
+  if (pct === null) return { label: 'PENDING', cls: 'empty' };
+  if (pct >= 75) return { label: 'ELITE TRAJECTORY', cls: 'elite' };
+  if (pct >= 50) return { label: 'DEVELOPMENTAL', cls: 'dev' };
+  return { label: 'LIMITED FIT', cls: 'low' };
+}
+
+
+/* ============================================================================
+   UI RENDERING
+============================================================================ */
+function renderRoster() {
+  const list = document.getElementById('roster-list');
+  document.getElementById('athlete-count').textContent = state.athletes.length;
+  if (state.athletes.length === 0) {
+    list.innerHTML = '<div class="empty-roster">No athletes yet. Click <strong>+ Add athlete</strong> to begin.</div>';
+    return;
+  }
+  let html = '';
+  for (const a of state.athletes) {
+    const comp = compositeScore(a);
+    const rating = compositeRating(comp.pct);
+    const pctStr = comp.pct === null ? '—' : `${comp.pct.toFixed(0)}%`;
+    const active = state.activeId === a.id ? 'active' : '';
+    html += `
+      <div class="athlete-row ${active}" onclick="setActive(${a.id})">
+        <div>
+          <div class="name">${escapeHtml(a.name)}</div>
+          <div class="meta">${a.gender === 'M' ? 'Boy' : 'Girl'}${a.age ? ' · age ' + a.age : ''}${a.school ? ' · ' + escapeHtml(a.school) : ''} · ${comp.completed}/5 batteries</div>
+        </div>
+        <span class="total-pill ${rating.cls}">${pctStr}</span>
+        <button onclick="event.stopPropagation(); generatePDF(${a.id})" title="Generate PDF report" style="padding:0.4rem 0.6rem;">📄 PDF</button>
+        <button class="x-btn" onclick="event.stopPropagation(); removeAthlete(${a.id})" title="Remove">×</button>
+      </div>
+    `;
+  }
+  list.innerHTML = html;
+}
+
+function setActive(id) {
+  state.activeId = id;
+  saveState();
+  renderRoster();
+  renderActiveTab();
+}
+
+function switchTab(tab) {
+  state.activeTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  renderActiveTab();
+}
+
+function renderActiveTab() {
+  const pane = document.getElementById('active-content');
+  const noAthlete = document.getElementById('no-athlete-msg');
+  const a = state.athletes.find(x => x.id === state.activeId);
+  if (!a) {
+    noAthlete.style.display = 'block';
+    pane.style.display = 'none';
+    return;
+  }
+  noAthlete.style.display = 'none';
+  pane.style.display = 'block';
+  switch(state.activeTab) {
+    case 'summary': renderSummary(a); break;
+    case 'b1': renderB1(a); break;
+    case 'b2': renderB2(a); break;
+    case 'b3': renderB3(a); break;
+    case 'b4': renderB4(a); break;
+    case 'b5': renderB5(a); break;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   SUMMARY TAB (with spider chart)
+---------------------------------------------------------------------------- */
+function renderSummary(a) {
+  const pane = document.getElementById('active-content');
+  const comp = compositeScore(a);
+  const rating = compositeRating(comp.pct);
+  const t1 = b1Total(a), t2 = b2Total(a), t3 = b3Total(a), t4 = b4Total(a), t5 = b5Total(a);
+
+  const pcts = DOMAIN_META.map(d => domainPct(a, d.key));
+  const compStr = comp.pct === null ? '—' : `${comp.pct.toFixed(1)}`;
+
+  pane.innerHTML = `
+    <div class="composite-box">
+      <div class="label">Composite Talent Index</div>
+      <div class="value">${compStr}<small>/100</small></div>
+      <div class="verdict">${rating.label} · ${comp.completed}/5 batteries scored</div>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <h3>Domain breakdown</h3>
+        <div class="domain-bars">
+          ${DOMAIN_META.map((d, i) => {
+            const p = pcts[i];
+            const pStr = p === null ? '—' : p.toFixed(0) + '%';
+            const w = p === null ? 0 : p;
+            return `
+              <div class="domain-bar">
+                <div class="lbl">${d.label}</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${w}%; background:${d.color}"></div></div>
+                <div class="val">${pStr}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        <div style="margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border); font-size: 0.78rem; color: var(--muted); line-height: 1.5;">
+          <strong>Raw totals:</strong>
+          Physical ${t1.total}/${t1.max} ·
+          Mobility ${t2.total}/${t2.scoredMax} ·
+          Wattbike ${t3.score === null ? '—' : t3.score + '/' + t3.max} ·
+          Times ${t4.total}/${t4.max} ·
+          Psych ${t5.total}/${t5.max}
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <h3>Spider profile</h3>
+        <div class="spider-container">
+          <svg id="spiderChart" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--muted); margin-top: 0.4rem; text-align: center;">
+          Each axis = domain %. Outer ring = 100%.
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <h3>Coach notes</h3>
+      <textarea class="notes-area" id="athlete-notes" placeholder="Selection rationale, follow-up actions, re-test schedule…">${escapeHtml(a.notes || '')}</textarea>
+    </div>
+
+    <div style="margin-top:1.25rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
+      <button class="gold" onclick="generatePDF(${a.id})">📄 Generate PDF Report</button>
+      <button onclick="duplicateAthlete(${a.id})">Duplicate athlete</button>
+    </div>
+  `;
+
+  // notes save handler
+  document.getElementById('athlete-notes').addEventListener('input', e => {
+    a.notes = e.target.value;
+    saveState();
+  });
+
+  drawSpiderSVG('spiderChart', pcts);
+}
+
+/* ----------------------------------------------------------------------------
+   SPIDER CHART (SVG, no library)
+---------------------------------------------------------------------------- */
+function drawSpiderSVG(elementId, pcts) {
+  const svg = document.getElementById(elementId);
+  if (!svg) return;
+  // Build via DOM rather than innerHTML for SVG safety
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  const cx = 200, cy = 210, R = 130;
+  const n = DOMAIN_META.length;
+  // Background rings
+  const rings = [0.2, 0.4, 0.6, 0.8, 1.0];
+  for (const ring of rings) {
+    const pts = [];
+    for (let i = 0; i < n; i++) {
+      const angle = -Math.PI/2 + (i * 2*Math.PI / n);
+      const r = R * ring;
+      pts.push((cx + r*Math.cos(angle)).toFixed(1) + ',' + (cy + r*Math.sin(angle)).toFixed(1));
+    }
+    const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    poly.setAttribute('points', pts.join(' '));
+    poly.setAttribute('fill', ring === 1.0 ? 'rgba(244,246,248,0.4)' : 'none');
+    poly.setAttribute('stroke', '#D6DBE3');
+    poly.setAttribute('stroke-width', ring === 1.0 ? '1.5' : '1');
+    poly.setAttribute('stroke-dasharray', ring === 1.0 ? '' : '2,3');
+    svg.appendChild(poly);
+  }
+  // Spokes
+  for (let i = 0; i < n; i++) {
+    const angle = -Math.PI/2 + (i * 2*Math.PI / n);
+    const x2 = cx + R * Math.cos(angle);
+    const y2 = cy + R * Math.sin(angle);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+    line.setAttribute('x2', x2.toFixed(1)); line.setAttribute('y2', y2.toFixed(1));
+    line.setAttribute('stroke', '#D6DBE3'); line.setAttribute('stroke-width', '1');
+    svg.appendChild(line);
+  }
+  // Data polygon
+  const dpts = [];
+  for (let i = 0; i < n; i++) {
+    const angle = -Math.PI/2 + (i * 2*Math.PI / n);
+    const v = pcts[i] === null ? 0 : Math.max(0, Math.min(100, pcts[i])) / 100;
+    const r = R * v;
+    dpts.push((cx + r*Math.cos(angle)).toFixed(1) + ',' + (cy + r*Math.sin(angle)).toFixed(1));
+  }
+  const dataPoly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+  dataPoly.setAttribute('points', dpts.join(' '));
+  dataPoly.setAttribute('fill', 'rgba(26,127,163,0.30)');
+  dataPoly.setAttribute('stroke', '#0A2342');
+  dataPoly.setAttribute('stroke-width', '2');
+  dataPoly.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(dataPoly);
+  // Data points (per-domain colour)
+  for (let i = 0; i < n; i++) {
+    const angle = -Math.PI/2 + (i * 2*Math.PI / n);
+    const v = pcts[i] === null ? 0 : Math.max(0, Math.min(100, pcts[i])) / 100;
+    const r = R * v;
+    const x = cx + r*Math.cos(angle);
+    const y = cy + r*Math.sin(angle);
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', x.toFixed(1)); c.setAttribute('cy', y.toFixed(1));
+    c.setAttribute('r', pcts[i] === null ? '3' : '5');
+    c.setAttribute('fill', pcts[i] === null ? '#CCCCCC' : DOMAIN_META[i].color);
+    c.setAttribute('stroke', 'white'); c.setAttribute('stroke-width', '2');
+    svg.appendChild(c);
+  }
+  // Labels
+  for (let i = 0; i < n; i++) {
+    const angle = -Math.PI/2 + (i * 2*Math.PI / n);
+    const labelR = R + 28;
+    const x = cx + labelR*Math.cos(angle);
+    const y = cy + labelR*Math.sin(angle);
+    const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    t.setAttribute('x', x.toFixed(1)); t.setAttribute('y', y.toFixed(1));
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('dominant-baseline', 'middle');
+    t.setAttribute('font-size', '13'); t.setAttribute('font-weight', '700');
+    t.setAttribute('fill', DOMAIN_META[i].color);
+    t.setAttribute('font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif');
+    t.textContent = DOMAIN_META[i].label;
+    svg.appendChild(t);
+    // Percentage below the label
+    const pctText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    pctText.setAttribute('x', x.toFixed(1));
+    pctText.setAttribute('y', (y + 14).toFixed(1));
+    pctText.setAttribute('text-anchor', 'middle');
+    pctText.setAttribute('font-size', '11'); pctText.setAttribute('font-weight', '600');
+    pctText.setAttribute('fill', '#555566');
+    pctText.setAttribute('font-family', 'ui-monospace, monospace');
+    pctText.textContent = pcts[i] === null ? '—' : pcts[i].toFixed(0) + '%';
+    svg.appendChild(pctText);
+  }
+  // Ring scale labels (20, 40, 60, 80, 100)
+  for (const ring of [0.2, 0.4, 0.6, 0.8, 1.0]) {
+    const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    t.setAttribute('x', cx + 3); t.setAttribute('y', cy - R*ring + 3);
+    t.setAttribute('font-size', '9'); t.setAttribute('fill', '#888');
+    t.setAttribute('font-family', 'ui-monospace, monospace');
+    t.textContent = (ring*100).toFixed(0);
+    svg.appendChild(t);
+  }
+}
+
+
+/* ----------------------------------------------------------------------------
+   B1 RENDER — Physical Talent ID
+---------------------------------------------------------------------------- */
+function renderB1(a) {
+  const pane = document.getElementById('active-content');
+  const t = b1Total(a);
+  const pct = t.count === 0 ? null : ((t.total / t.max) * 100);
+  pane.innerHTML = `
+    <div class="domain-head">
+      <div>
+        <h2>Battery 1 — Physical Talent ID</h2>
+        <div class="sub">Anthropometry, mobility, strength, swim ability · 7 scored tests · max 15</div>
+      </div>
+      <div class="score-box">
+        <div class="raw">${t.total}<small> / ${t.max}</small></div>
+        <div class="pct">${pct === null ? '—' : pct.toFixed(0) + '%'}</div>
+      </div>
+    </div>
+    <div id="b1-tests"></div>
+  `;
+  const container = document.getElementById('b1-tests');
+  for (const test of B1_TESTS) {
+    const score = b1TestScore(a, test);
+    const r = a.b1[test.id] || {};
+    let inputHtml = '';
+    if (test.type === 'select') {
+      inputHtml = `
+        <div class="input-group" style="max-width:280px">
+          <label>${test.fields ? test.fields[0].label : 'Score'}</label>
+          <select onchange="setB1Select(${a.id}, '${test.id}', this.value)">
+            <option value="">—</option>
+            ${test.options.map(o => `<option value="${o.value}" ${r.value == o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
+          </select>
+        </div>
+      `;
+    } else {
+      inputHtml = '<div class="input-row">';
+      for (const f of test.fields) {
+        inputHtml += `
+          <div class="input-group">
+            <label>${f.label}</label>
+            <input type="number" step="${f.step || '1'}" placeholder="${f.placeholder || ''}" value="${r[f.id] != null ? r[f.id] : ''}"
+              oninput="setB1Numeric(${a.id}, '${test.id}', '${f.id}', this.value)">
+          </div>
+        `;
+      }
+      inputHtml += '</div>';
+      if (test.hasCannotFlag) {
+        inputHtml += `
+          <div class="check-row">
+            <input type="checkbox" id="b1-cannot-${test.id}" ${r.cannot ? 'checked' : ''} onchange="setB1Cannot(${a.id}, '${test.id}', this.checked)">
+            <label for="b1-cannot-${test.id}">Cannot swim 25m / floats only</label>
+          </div>
+        `;
+      }
+    }
+    const scoreCls = score === null ? '' : 's-' + score;
+    const scoreStr = score === null ? '—' : score;
+    container.insertAdjacentHTML('beforeend', `
+      <div class="test-card">
+        <div class="test-card-head">
+          <div>
+            <div class="name">${test.name}</div>
+            <div class="param">${test.param}</div>
+          </div>
+          <div class="score-tag ${scoreCls}">${scoreStr}${test.unscored ? ' / —' : ''}</div>
+        </div>
+        ${inputHtml}
+        <div class="info">${test.info}</div>
+      </div>
+    `);
+  }
+}
+
+function setB1Numeric(athleteId, testId, fieldId, value) {
+  const a = state.athletes.find(x => x.id === athleteId);
+  if (!a) return;
+  if (!a.b1[testId]) a.b1[testId] = {};
+  // Store the raw string so what the user typed stays intact (e.g. "1." mid-typing).
+  // Scoring functions parseFloat on read.
+  a.b1[testId][fieldId] = value === '' ? null : value;
+  saveState();
+  updateB1ScoresInPlace(a, testId);
+}
+function setB1Select(athleteId, testId, value) {
+  const a = state.athletes.find(x => x.id === athleteId);
+  if (!a) return;
+  if (!a.b1[testId]) a.b1[testId] = {};
+  a.b1[testId].value = value === '' ? null : parseInt(value, 10);
+  saveState();
+  updateB1ScoresInPlace(a, testId);
+}
+function setB1Cannot(athleteId, testId, checked) {
+  const a = state.athletes.find(x => x.id === athleteId);
+  if (!a) return;
+  if (!a.b1[testId]) a.b1[testId] = {};
+  a.b1[testId].cannot = checked;
+  saveState();
+  updateB1ScoresInPlace(a, testId);
+}
+function updateB1ScoresInPlace(a, changedTestId) {
+  // Update only the score tag on the changed card + the domain head.
+  // Avoid full re-render so the typed string and cursor position stay intact.
+  if (state.activeTab === 'b1') {
+    const cards = document.querySelectorAll('#b1-tests .test-card');
+    let i = 0;
+    for (const t of B1_TESTS) {
+      const card = cards[i++];
+      if (!card) continue;
+      const tag = card.querySelector('.score-tag');
+      if (!tag) continue;
+      const score = b1TestScore(a, t);
+      tag.className = 'score-tag' + (score === null ? '' : ' s-' + score);
+      tag.textContent = (score === null ? '—' : score) + (t.unscored ? ' / —' : '');
+    }
+    // Domain head
+    const t = b1Total(a);
+    const pct = t.count === 0 ? null : (t.total / t.max) * 100;
+    const head = document.querySelector('#active-content .domain-head .score-box');
+    if (head) {
+      head.querySelector('.raw').innerHTML = `${t.total}<small> / ${t.max}</small>`;
+      head.querySelector('.pct').textContent = pct === null ? '—' : pct.toFixed(0) + '%';
+    }
+  }
+  renderRoster();
+}
+
+/* ----------------------------------------------------------------------------
+   B2 RENDER — Mobility (bilateral)
+---------------------------------------------------------------------------- */
+function renderB2(a) {
+  const pane = document.getElementById('active-content');
+  const t = b2Total(a);
+  const pct = t.max === 0 ? null : ((t.total / B2_MAX) * 100);
+  pane.innerHTML = `
+    <div class="domain-head">
+      <div>
+        <h2>Battery 2 — Mobility Screen</h2>
+        <div class="sub">8 bilateral tests · left + right scored 0 or 2 · max 32</div>
+      </div>
+      <div class="score-box">
+        <div class="raw">${t.total}<small> / ${B2_MAX}</small></div>
+        <div class="pct">${pct === null ? '—' : pct.toFixed(0) + '%'}</div>
+      </div>
+    </div>
+    <div id="b2-tests"></div>
+  `;
+  const container = document.getElementById('b2-tests');
+  for (const test of B2_TESTS) {
+    const r = a.b2[test.id] || {};
+    const sL = b2TestSideScore(test, r.left);
+    const sR = b2TestSideScore(test, r.right);
+    let asymWarn = '';
+    if (r.left != null && r.right != null && r.left !== '' && r.right !== '') {
+      const diff = Math.abs(parseFloat(r.left) - parseFloat(r.right));
+      if (!isNaN(diff) && diff > test.asym) {
+        asymWarn = `<div class="info" style="border-left-color: var(--amber); background: var(--light-gold); color: var(--amber);"><strong>L/R asymmetry ${diff.toFixed(1)}${test.unit}</strong> exceeds threshold (${test.asym}${test.unit}). Flag for follow-up.</div>`;
+      }
+    }
+    let inputHtml;
+    if (test.isPassFail) {
+      inputHtml = `
+        <div class="bilat-grid">
+          <div>
+            <label>Left (0 fail · 1 partial · 2 pass)</label>
+            <select onchange="setB2(${a.id}, '${test.id}', 'left', this.value)">
+              <option value="">—</option>
+              <option value="0" ${r.left == 0 ? 'selected' : ''}>0 — Fail</option>
+              <option value="1" ${r.left == 1 ? 'selected' : ''}>1 — Partial</option>
+              <option value="2" ${r.left == 2 ? 'selected' : ''}>2 — Pass</option>
+            </select>
+          </div>
+          <div>
+            <label>Right</label>
+            <select onchange="setB2(${a.id}, '${test.id}', 'right', this.value)">
+              <option value="">—</option>
+              <option value="0" ${r.right == 0 ? 'selected' : ''}>0 — Fail</option>
+              <option value="1" ${r.right == 1 ? 'selected' : ''}>1 — Partial</option>
+              <option value="2" ${r.right == 2 ? 'selected' : ''}>2 — Pass</option>
+            </select>
+          </div>
+        </div>
+      `;
+    } else {
+      inputHtml = `
+        <div class="bilat-grid">
+          <div>
+            <label>Left (${test.unit})</label>
+            <input type="number" step="0.1" value="${r.left != null ? r.left : ''}" placeholder="—"
+              oninput="setB2(${a.id}, '${test.id}', 'left', this.value)">
+          </div>
+          <div>
+            <label>Right (${test.unit})</label>
+            <input type="number" step="0.1" value="${r.right != null ? r.right : ''}" placeholder="—"
+              oninput="setB2(${a.id}, '${test.id}', 'right', this.value)">
+          </div>
+        </div>
+      `;
+    }
+    const totalSide = (sL === null ? 0 : sL) + (sR === null ? 0 : sR);
+    const cardScore = (sL === null && sR === null) ? null : totalSide;
+    const scoreCls = cardScore === null ? '' : (cardScore === 4 ? 's-3' : cardScore === 0 ? 's-0' : 's-1');
+    const scoreStr = cardScore === null ? '—' : cardScore;
+    let thresholdText;
+    if (test.isPassFail) {
+      thresholdText = `<strong>Pass</strong> = both sides score 2`;
+    } else {
+      const opLine = test.score.toString();
+      // extract threshold value
+      const m = opLine.match(/>=\s*(-?\d+)/);
+      const thr = m ? m[1] : '?';
+      thresholdText = `<strong>Pass threshold</strong> = ≥ ${thr}${test.unit} per side · <strong>asymmetry flag</strong> at > ${test.asym}${test.unit}`;
+    }
+    container.insertAdjacentHTML('beforeend', `
+      <div class="test-card" data-test-id="${test.id}">
+        <div class="test-card-head">
+          <div>
+            <div class="name">${test.label}</div>
+            <div class="param">Left <span class="sL-disp">${sL===null?'—':sL}</span> · Right <span class="sR-disp">${sR===null?'—':sR}</span></div>
+          </div>
+          <div class="score-tag ${scoreCls}">${scoreStr} / 4</div>
+        </div>
+        ${inputHtml}
+        <div class="asym-slot">${asymWarn}</div>
+        <div class="info">${thresholdText}</div>
+      </div>
+    `);
+  }
+}
+function setB2(athleteId, testId, side, value) {
+  const a = state.athletes.find(x => x.id === athleteId);
+  if (!a) return;
+  if (!a.b2[testId]) a.b2[testId] = {};
+  // Store raw string so what's typed (e.g. "12." mid-typing) stays intact
+  a.b2[testId][side] = value === '' ? null : value;
+  saveState();
+  updateB2InPlace(a, testId);
+}
+function updateB2InPlace(a, changedTestId) {
+  if (state.activeTab === 'b2') {
+    const card = document.querySelector(`#b2-tests .test-card[data-test-id="${changedTestId}"]`);
+    if (card) {
+      const test = B2_TESTS.find(t => t.id === changedTestId);
+      const r = a.b2[changedTestId] || {};
+      const sL = b2TestSideScore(test, r.left);
+      const sR = b2TestSideScore(test, r.right);
+      const cardScore = (sL === null && sR === null) ? null : ((sL || 0) + (sR || 0));
+      const scoreCls = cardScore === null ? '' : (cardScore === 4 ? 's-3' : cardScore === 0 ? 's-0' : 's-1');
+      const scoreStr = cardScore === null ? '—' : cardScore;
+      const tag = card.querySelector('.score-tag');
+      if (tag) {
+        tag.className = 'score-tag' + (scoreCls ? ' ' + scoreCls : '');
+        tag.textContent = `${scoreStr} / 4`;
+      }
+      const sLDisp = card.querySelector('.sL-disp'), sRDisp = card.querySelector('.sR-disp');
+      if (sLDisp) sLDisp.textContent = sL === null ? '—' : sL;
+      if (sRDisp) sRDisp.textContent = sR === null ? '—' : sR;
+      // Asymmetry slot
+      const slot = card.querySelector('.asym-slot');
+      if (slot) {
+        let asymWarn = '';
+        if (r.left != null && r.right != null && r.left !== '' && r.right !== '') {
+          const diff = Math.abs(parseFloat(r.left) - parseFloat(r.right));
+          if (!isNaN(diff) && diff > test.asym) {
+            asymWarn = `<div class="info" style="border-left-color: var(--amber); background: var(--light-gold); color: var(--amber);"><strong>L/R asymmetry ${diff.toFixed(1)}${test.unit}</strong> exceeds threshold (${test.asym}${test.unit}). Flag for follow-up.</div>`;
+          }
+        }
+        slot.innerHTML = asymWarn;
+      }
+    }
+    // Domain head
+    const t = b2Total(a);
+    const pct = t.max === 0 ? null : (t.total / B2_MAX) * 100;
+    const head = document.querySelector('#active-content .domain-head .score-box');
+    if (head) {
+      head.querySelector('.raw').innerHTML = `${t.total}<small> / ${B2_MAX}</small>`;
+      head.querySelector('.pct').textContent = pct === null ? '—' : pct.toFixed(0) + '%';
+    }
+  }
+  renderRoster();
+}
+
+
+/* ----------------------------------------------------------------------------
+   B3 RENDER — Wattbike 6-min Pacing
+---------------------------------------------------------------------------- */
+function renderB3(a) {
+  const pane = document.getElementById('active-content');
+  const result = b3Classify(a.b3.powers);
+  const pct = result.complete ? (result.score / B3_MAX) * 100 : null;
+  pane.innerHTML = `
+    <div class="domain-head">
+      <div>
+        <h2>Battery 3 — Wattbike 6-Min Pacing</h2>
+        <div class="sub">Average power per minute · pattern classification · score 1–4</div>
+      </div>
+      <div class="score-box">
+        <div class="raw">${result.complete ? result.score : '—'}<small> / ${B3_MAX}</small></div>
+        <div class="pct">${pct === null ? '—' : pct.toFixed(0) + '%'}</div>
+      </div>
+    </div>
+
+    <div class="test-card">
+      <div class="test-card-head">
+        <div>
+          <div class="name">Six-minute step-test — average power per minute</div>
+          <div class="param">Self-paced. Athlete chooses opening intensity. Record mean power for each minute window.</div>
+        </div>
+      </div>
+      <div class="splits-grid" id="b3-splits"></div>
+      <div class="pattern-result" id="b3-pattern-result">
+        <div class="pattern-badge ${result.complete ? result.pattern : 'PENDING'}">${result.complete ? result.pattern : 'PENDING'}</div>
+        <div>
+          <div class="interp">${result.complete ? result.interp : 'Enter all six minute-by-minute power values to classify the pattern.'}</div>
+          ${result.complete ? `
+            <div class="pattern-stats">
+              <span>mean: <strong>${result.mean.toFixed(0)}W</strong></span>
+              <span>CV: <strong>${result.cv.toFixed(1)}%</strong></span>
+              <span>slope: <strong>${result.slope >= 0 ? '+' : ''}${result.slope.toFixed(1)} W/min</strong></span>
+              <span>%/min: <strong>${result.slopePct >= 0 ? '+' : ''}${result.slopePct.toFixed(1)}%</strong></span>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+      <div class="info">
+        <strong>GREEN (4)</strong> = power builds ≥+2%/min · <strong>AMBER (3)</strong> = steady, CV ≤10% & flat · <strong>BLACK (2)</strong> = inconsistent · <strong>RED (1)</strong> = power fades ≤−2%/min
+      </div>
+    </div>
+  `;
+  const grid = document.getElementById('b3-splits');
+  for (let i = 1; i <= 6; i++) {
+    const v = a.b3.powers[i-1];
+    grid.insertAdjacentHTML('beforeend', `
+      <div class="split-cell">
+        <div class="minute-tag">Minute</div>
+        <div class="minute-num">0${i}</div>
+        <input type="number" min="0" step="1" placeholder="—" value="${v != null ? v : ''}"
+          oninput="setB3(${a.id}, ${i-1}, this.value)">
+        <div class="unit">watts</div>
+      </div>
+    `);
+  }
+}
+function setB3(athleteId, idx, value) {
+  const a = state.athletes.find(x => x.id === athleteId);
+  if (!a) return;
+  if (!a.b3.powers) a.b3.powers = [null,null,null,null,null,null];
+  // Store raw string; b3Classify coerces
+  a.b3.powers[idx] = value === '' ? null : value;
+  saveState();
+  updateB3InPlace(a);
+}
+function updateB3InPlace(a) {
+  if (state.activeTab === 'b3') {
+    const result = b3Classify(a.b3.powers);
+    const pct = result.complete ? (result.score / B3_MAX) * 100 : null;
+    // Update domain head
+    const head = document.querySelector('#active-content .domain-head .score-box');
+    if (head) {
+      head.querySelector('.raw').innerHTML = `${result.complete ? result.score : '—'}<small> / ${B3_MAX}</small>`;
+      head.querySelector('.pct').textContent = pct === null ? '—' : pct.toFixed(0) + '%';
+    }
+    // Update pattern result block
+    const pr = document.getElementById('b3-pattern-result');
+    if (pr) {
+      pr.innerHTML = `
+        <div class="pattern-badge ${result.complete ? result.pattern : 'PENDING'}">${result.complete ? result.pattern : 'PENDING'}</div>
+        <div>
+          <div class="interp">${result.complete ? result.interp : 'Enter all six minute-by-minute power values to classify the pattern.'}</div>
+          ${result.complete ? `
+            <div class="pattern-stats">
+              <span>mean: <strong>${result.mean.toFixed(0)}W</strong></span>
+              <span>CV: <strong>${result.cv.toFixed(1)}%</strong></span>
+              <span>slope: <strong>${result.slope >= 0 ? '+' : ''}${result.slope.toFixed(1)} W/min</strong></span>
+              <span>%/min: <strong>${result.slopePct >= 0 ? '+' : ''}${result.slopePct.toFixed(1)}%</strong></span>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+  }
+  renderRoster();
+}
+
+/* ----------------------------------------------------------------------------
+   B4 RENDER — Time Standards
+---------------------------------------------------------------------------- */
+function renderB4(a) {
+  const pane = document.getElementById('active-content');
+  const t = b4Total(a);
+  const pct = t.count === 0 ? null : ((t.total / t.max) * 100);
+  const ageNote = (a.age >= 12 && a.age <= 14) ? `` : `<div class="info" style="border-left-color: var(--amber); background: var(--light-gold);"><strong>Note:</strong> Standards are defined for ages 12–14 only. Age ${a.age || '?'} falls outside this band; closest age (${Math.min(14, Math.max(12, a.age || 13))}) will be used for reference.</div>`;
+  pane.innerHTML = `
+    <div class="domain-head">
+      <div>
+        <h2>Battery 4 — Time Standards</h2>
+        <div class="sub">5 × 200m events benchmarked vs Vision 2032 age/gender standard · ±${B4_DEV_PCT}% deviation band</div>
+      </div>
+      <div class="score-box">
+        <div class="raw">${t.total}<small> / ${t.max}</small></div>
+        <div class="pct">${pct === null ? '—' : pct.toFixed(0) + '%'}</div>
+      </div>
+    </div>
+    ${ageNote}
+    <table class="events-table">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th class="r">Standard</th>
+          <th class="r">Athlete time (M:SS.ss)</th>
+          <th class="r">Delta</th>
+          <th class="r">Score</th>
+        </tr>
+      </thead>
+      <tbody id="b4-events"></tbody>
+    </table>
+    <div class="info" style="margin-top: 1rem;">
+      <strong>Scoring:</strong> Score <strong>2</strong> = at standard or within +${B4_DEV_PCT}% · Score <strong>1</strong> = +${B4_DEV_PCT}% to +${B4_DEV_PCT*2}% · Score <strong>0</strong> = slower than +${B4_DEV_PCT*2}%
+    </div>
+  `;
+  const body = document.getElementById('b4-events');
+  for (const ev of B4_EVENTS) {
+    const std = b4EventStandard(a, ev);
+    const actual = timeToSeconds(a.b4[ev]);
+    const score = b4ScoreEvent(a, ev);
+    let deltaHtml = '—';
+    if (std !== null && actual !== null) {
+      const d = actual - std;
+      const cls = d < 0 ? 'delta-neg' : d > 0 ? 'delta-pos' : '';
+      const sign = d < 0 ? '−' : d > 0 ? '+' : '';
+      deltaHtml = `<span class="${cls}">${sign}${Math.abs(d).toFixed(2)}s</span>`;
+    }
+    let pillCls = 's-x', pillStr = 'PENDING';
+    if (score === 2) { pillCls = 's-2'; pillStr = 'AT / FASTER'; }
+    else if (score === 1) { pillCls = 's-1'; pillStr = '1–2 DEV SLOW'; }
+    else if (score === 0) { pillCls = 's-0'; pillStr = '>2 DEV SLOW'; }
+    body.insertAdjacentHTML('beforeend', `
+      <tr data-event="${ev}">
+        <td>${ev}</td>
+        <td class="r">${std !== null ? secondsToTime(std) : '—'}</td>
+        <td class="r"><input type="text" placeholder="2:30.50" value="${a.b4[ev] || ''}" oninput="setB4(${a.id}, '${ev.replace(/'/g, "\\'")}', this.value)"></td>
+        <td class="r delta-cell">${deltaHtml}</td>
+        <td class="r"><span class="pill ${pillCls}">${pillStr}</span></td>
+      </tr>
+    `);
+  }
+}
+function setB4(athleteId, event, value) {
+  const a = state.athletes.find(x => x.id === athleteId);
+  if (!a) return;
+  a.b4[event] = value;
+  saveState();
+  updateB4InPlace(a, event);
+}
+function updateB4InPlace(a, changedEvent) {
+  if (state.activeTab === 'b4') {
+    // Update the changed row only
+    // Escape selector for event name (contains spaces)
+    const rows = document.querySelectorAll('#b4-events tr');
+    for (const row of rows) {
+      const ev = row.getAttribute('data-event');
+      if (!ev) continue;
+      const std = b4EventStandard(a, ev);
+      const actual = timeToSeconds(a.b4[ev]);
+      const score = b4ScoreEvent(a, ev);
+      let deltaHtml = '—';
+      if (std !== null && actual !== null) {
+        const d = actual - std;
+        const cls = d < 0 ? 'delta-neg' : d > 0 ? 'delta-pos' : '';
+        const sign = d < 0 ? '−' : d > 0 ? '+' : '';
+        deltaHtml = `<span class="${cls}">${sign}${Math.abs(d).toFixed(2)}s</span>`;
+      }
+      let pillCls = 's-x', pillStr = 'PENDING';
+      if (score === 2) { pillCls = 's-2'; pillStr = 'AT / FASTER'; }
+      else if (score === 1) { pillCls = 's-1'; pillStr = '1–2 DEV SLOW'; }
+      else if (score === 0) { pillCls = 's-0'; pillStr = '>2 DEV SLOW'; }
+      const deltaCell = row.querySelector('.delta-cell');
+      if (deltaCell) deltaCell.innerHTML = deltaHtml;
+      const pill = row.querySelector('.pill');
+      if (pill) {
+        pill.className = 'pill ' + pillCls;
+        pill.textContent = pillStr;
+      }
+    }
+    // Domain head
+    const t = b4Total(a);
+    const pct = t.count === 0 ? null : (t.total / t.max) * 100;
+    const head = document.querySelector('#active-content .domain-head .score-box');
+    if (head) {
+      head.querySelector('.raw').innerHTML = `${t.total}<small> / ${t.max}</small>`;
+      head.querySelector('.pct').textContent = pct === null ? '—' : pct.toFixed(0) + '%';
+    }
+  }
+  renderRoster();
+}
+
+/* ----------------------------------------------------------------------------
+   B5 RENDER — Psychology
+---------------------------------------------------------------------------- */
+function renderB5(a) {
+  const pane = document.getElementById('active-content');
+  const t = b5Total(a);
+  const pct = t.answered === 0 ? null : ((t.total / t.max) * 100);
+  pane.innerHTML = `
+    <div class="domain-head">
+      <div>
+        <h2>Battery 5 — Psychology (Phase 2)</h2>
+        <div class="sub">5 domains × 3 dimensions (Specificity / Self-awareness / Agency) · scored 0–2 each · max 30</div>
+      </div>
+      <div class="score-box">
+        <div class="raw">${t.total}<small> / ${t.max}</small></div>
+        <div class="pct">${pct === null ? '—' : pct.toFixed(0) + '%'} · ${t.answered}/15 scored</div>
+      </div>
+    </div>
+    <div id="b5-domains"></div>
+  `;
+  const container = document.getElementById('b5-domains');
+  for (const d of B5_DOMAINS) {
+    let dimHtml = '<div class="dimensions-grid">';
+    for (const dim of B5_DIMENSIONS) {
+      const key = `${d.id}_${dim.id}`;
+      const v = a.b5[key];
+      dimHtml += `
+        <div class="dim-cell">
+          <label>${dim.name}</label>
+          <select onchange="setB5(${a.id}, '${key}', this.value)">
+            <option value="">—</option>
+            <option value="2" ${v == 2 ? 'selected' : ''}>2 — Above</option>
+            <option value="1" ${v == 1 ? 'selected' : ''}>1 — Age-app.</option>
+            <option value="0" ${v == 0 ? 'selected' : ''}>0 — Below</option>
+          </select>
+        </div>
+      `;
+    }
+    dimHtml += '</div>';
+    const notesKey = `${d.id}_notes`;
+    container.insertAdjacentHTML('beforeend', `
+      <div class="test-card">
+        <div class="test-card-head">
+          <div>
+            <div class="name">${d.title}</div>
+            <div class="param">${d.id.toUpperCase()}</div>
+          </div>
+        </div>
+        <div class="questions">
+          <div><strong>Q1:</strong> ${d.primary}</div>
+          <div><strong>Probe:</strong> ${d.probe}</div>
+          <div><strong>Final:</strong> ${d.final}</div>
+        </div>
+        ${dimHtml}
+        <div class="notes-label">Notes (verbatim quotes, body language, parent observations)</div>
+        <textarea class="notes-area" oninput="setB5Notes(${a.id}, '${notesKey}', this.value)" placeholder="Verbatim quotes preferred over interpretation…">${escapeHtml(a.b5[notesKey] || '')}</textarea>
+      </div>
+    `);
+  }
+}
+function setB5(athleteId, key, value) {
+  const a = state.athletes.find(x => x.id === athleteId);
+  if (!a) return;
+  a.b5[key] = value === '' ? null : parseInt(value, 10);
+  saveState();
+  // update header score box only — avoid full re-render to preserve textareas
+  const t = b5Total(a);
+  const pct = t.answered === 0 ? null : ((t.total / t.max) * 100);
+  const head = document.querySelector('#active-content .domain-head .score-box');
+  if (head) {
+    head.querySelector('.raw').innerHTML = `${t.total}<small> / ${t.max}</small>`;
+    head.querySelector('.pct').textContent = (pct === null ? '—' : pct.toFixed(0) + '%') + ` · ${t.answered}/15 scored`;
+  }
+  renderRoster();
+}
+function setB5Notes(athleteId, key, value) {
+  const a = state.athletes.find(x => x.id === athleteId);
+  if (!a) return;
+  a.b5[key] = value;
+  saveState();
+}
+
+
+/* ============================================================================
+   ATHLETE MGMT
+============================================================================ */
+function openAddModal() {
+  document.getElementById('addModal').classList.remove('hidden');
+  document.getElementById('m-name').focus();
+}
+function closeAddModal() {
+  document.getElementById('addModal').classList.add('hidden');
+  ['m-name','m-age','m-school','m-date'].forEach(id => document.getElementById(id).value = '');
+}
+function addAthleteFromModal() {
+  const name = document.getElementById('m-name').value.trim();
+  if (!name) { document.getElementById('m-name').focus(); return; }
+  const gender = document.getElementById('m-gender').value;
+  const age = parseInt(document.getElementById('m-age').value, 10) || null;
+  const school = document.getElementById('m-school').value.trim();
+  const date = document.getElementById('m-date').value.trim();
+  const a = newAthlete(name, gender, age, school, date);
+  state.athletes.push(a);
+  state.activeId = a.id;
+  saveState();
+  closeAddModal();
+  renderRoster();
+  renderActiveTab();
+}
+function removeAthlete(id) {
+  const a = state.athletes.find(x => x.id === id);
+  if (!a) return;
+  if (!confirm(`Remove ${a.name}? This cannot be undone.`)) return;
+  state.athletes = state.athletes.filter(x => x.id !== id);
+  if (state.activeId === id) state.activeId = state.athletes[0] ? state.athletes[0].id : null;
+  saveState();
+  renderRoster();
+  renderActiveTab();
+}
+function duplicateAthlete(id) {
+  const a = state.athletes.find(x => x.id === id);
+  if (!a) return;
+  const copy = JSON.parse(JSON.stringify(a));
+  copy.id = nextId++;
+  copy.name = a.name + ' (copy)';
+  state.athletes.push(copy);
+  saveState();
+  renderRoster();
+}
+function confirmClearAll() {
+  if (!confirm('Clear ALL athletes and scores? This cannot be undone.')) return;
+  state.athletes = [];
+  state.activeId = null;
+  nextId = 1;
+  saveState();
+  renderRoster();
+  renderActiveTab();
+}
+function exportAllJSON() {
+  const blob = new Blob([JSON.stringify({ state, nextId, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `vision2032-battery-${new Date().toISOString().slice(0,10)}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.state && data.state.athletes) {
+        state = data.state;
+        nextId = data.nextId || (Math.max(0, ...state.athletes.map(a => a.id)) + 1);
+        saveState();
+        renderRoster();
+        renderActiveTab();
+        alert(`Imported ${state.athletes.length} athletes.`);
+      } else alert('Invalid file format.');
+    } catch(err) { alert('Failed to parse JSON: ' + err.message); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+
+/* ============================================================================
+   PDF REPORT GENERATION
+   Two-page (or more) report:
+     Page 1: Header · composite · spider chart (rasterised) · domain breakdown bars
+     Page 2: Per-domain scorecards (Physical, Mobility, Wattbike, Times, Psych)
+============================================================================ */
+function generatePDF(athleteId) {
+  const a = state.athletes.find(x => x.id === athleteId);
+  if (!a) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const PAGE_W = 210, PAGE_H = 297;
+  const MARGIN = 14;
+
+  const comp = compositeScore(a);
+  const rating = compositeRating(comp.pct);
+  const t1 = b1Total(a), t2 = b2Total(a), t3 = b3Total(a), t4 = b4Total(a), t5 = b5Total(a);
+  const pcts = DOMAIN_META.map(d => domainPct(a, d.key));
+
+  // ============ PAGE 1: COVER + SPIDER + COMPOSITE ============
+  // Banner
+  doc.setFillColor(10, 35, 66);
+  doc.rect(0, 0, PAGE_W, 32, 'F');
+  doc.setTextColor(200, 150, 12);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.text('SAQ · VISION 2032', MARGIN, 11);
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(17);
+  doc.text('Combined Battery of Tests', MARGIN, 19);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Physical · Mobility · Wattbike · Time Standards · Psychology', MARGIN, 26);
+
+  // Athlete identity block
+  let y = 42;
+  doc.setTextColor(26, 26, 46);
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text(a.name, MARGIN, y);
+  y += 7;
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(85, 85, 102);
+  let meta = a.gender === 'M' ? 'Boy' : 'Girl';
+  if (a.age) meta += ` · age ${a.age}`;
+  if (a.school) meta += ` · ${a.school}`;
+  if (a.testDate) meta += ` · tested ${a.testDate}`;
+  meta += ` · report generated ${new Date().toISOString().slice(0,10)}`;
+  doc.text(meta, MARGIN, y);
+  y += 10;
+
+  // Composite box
+  doc.setFillColor(10, 35, 66);
+  doc.rect(MARGIN, y, PAGE_W - 2*MARGIN, 32, 'F');
+  doc.setTextColor(200, 150, 12);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.text('COMPOSITE TALENT INDEX', MARGIN + 5, y + 7);
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(36);
+  doc.setFont('helvetica', 'bold');
+  const compStr = comp.pct === null ? '—' : comp.pct.toFixed(1);
+  doc.text(compStr, MARGIN + 5, y + 24);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  doc.text('/ 100', MARGIN + 5 + doc.getTextWidth(compStr) + 2, y + 24);
+  // Rating tag (right)
+  const ratingColors = {
+    elite: [45, 134, 89],
+    dev: [200, 150, 12],
+    low: [197, 48, 48],
+    empty: [120, 120, 120]
+  };
+  const rc = ratingColors[rating.cls] || ratingColors.empty;
+  doc.setFillColor(...rc);
+  const rTagX = PAGE_W - MARGIN - 60, rTagW = 55;
+  doc.roundedRect(rTagX, y + 8, rTagW, 16, 2, 2, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text(rating.label, rTagX + rTagW/2, y + 18, { align: 'center' });
+  // batteries completed
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(255, 255, 255);
+  doc.text(`${comp.completed}/5 batteries scored`, rTagX + rTagW/2, y + 28, { align: 'center' });
+  y += 38;
+
+  // ============ Render the spider chart to a canvas, then to PDF ============
+  const spiderImg = renderSpiderToDataURL(pcts, 600);
+  const spiderSize = 92;
+  const spiderX = MARGIN;
+  const spiderY = y;
+  doc.addImage(spiderImg, 'PNG', spiderX, spiderY, spiderSize, spiderSize);
+
+  // Section header beside spider
+  const barsX = spiderX + spiderSize + 8;
+  const barsW = PAGE_W - MARGIN - barsX;
+  doc.setTextColor(10, 35, 66);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Domain breakdown', barsX, y + 5);
+
+  // Domain horizontal bars
+  let by = y + 11;
+  doc.setFontSize(9);
+  for (let i = 0; i < DOMAIN_META.length; i++) {
+    const d = DOMAIN_META[i];
+    const p = pcts[i];
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(26, 26, 46);
+    doc.text(d.label, barsX, by + 4);
+    // bar track
+    const trackX = barsX + 24;
+    const trackW = barsW - 38;
+    const trackY = by + 1.6;
+    doc.setFillColor(225, 228, 232);
+    doc.roundedRect(trackX, trackY, trackW, 3.6, 1, 1, 'F');
+    // fill
+    if (p !== null) {
+      const rgb = hexToRgb(d.color);
+      doc.setFillColor(...rgb);
+      doc.roundedRect(trackX, trackY, trackW * (p/100), 3.6, 1, 1, 'F');
+    }
+    // value
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(85, 85, 102);
+    const pctStr = p === null ? '—' : p.toFixed(0) + '%';
+    doc.text(pctStr, PAGE_W - MARGIN, by + 4, { align: 'right' });
+    by += 9;
+  }
+
+  // Raw totals summary line
+  by += 4;
+  doc.setDrawColor(225, 228, 232);
+  doc.line(barsX, by - 2, PAGE_W - MARGIN, by - 2);
+  doc.setFontSize(7.5);
+  doc.setTextColor(85, 85, 102);
+  doc.setFont('helvetica', 'normal');
+  const wattStr = t3.score === null ? '—' : `${t3.score}/${t3.max}` + (t3.pattern ? ` (${t3.pattern})` : '');
+  const rawLines = [
+    `Physical: ${t1.total}/${t1.max} raw  ·  Mobility: ${t2.total}/${B2_MAX} raw`,
+    `Wattbike: ${wattStr}  ·  Time stds: ${t4.total}/${t4.max} (${t4.count}/5 events)`,
+    `Psychology: ${t5.total}/${t5.max} (${t5.answered}/15 cells)`
+  ];
+  for (const line of rawLines) { doc.text(line, barsX, by + 2); by += 4.2; }
+  y = spiderY + spiderSize + 8;
+
+  // Coach notes
+  if (a.notes && a.notes.trim()) {
+    doc.setTextColor(10, 35, 66);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Coach notes', MARGIN, y + 4);
+    y += 7;
+    doc.setFillColor(248, 250, 252);
+    const notesHeight = Math.min(40, 6 + (a.notes.length / 80) * 4);
+    doc.rect(MARGIN, y, PAGE_W - 2*MARGIN, notesHeight, 'F');
+    doc.setTextColor(26, 26, 46);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    const wrappedNotes = doc.splitTextToSize(a.notes, PAGE_W - 2*MARGIN - 6);
+    doc.text(wrappedNotes, MARGIN + 3, y + 5);
+    y += notesHeight + 4;
+  }
+
+  // Page footer
+  doc.setFontSize(7.5);
+  doc.setTextColor(140, 140, 150);
+  doc.text('Vision 2032 Combined Battery · SAQ National Talent ID', MARGIN, PAGE_H - 8);
+  doc.text(`Page 1`, PAGE_W - MARGIN, PAGE_H - 8, { align: 'right' });
+
+  // ============ PAGE 2: DETAILED SCORECARDS ============
+  doc.addPage();
+  let py = MARGIN;
+  // banner
+  doc.setFillColor(10, 35, 66);
+  doc.rect(0, 0, PAGE_W, 14, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`${a.name} — Detailed Scorecard`, MARGIN, 9);
+  doc.setTextColor(200, 150, 12);
+  doc.setFontSize(8);
+  doc.text('SAQ VISION 2032', PAGE_W - MARGIN, 9, { align: 'right' });
+  py = 22;
+
+  // --- B1: Physical
+  py = drawDomainHeader(doc, py, '1 · Physical Talent ID', `${t1.total}/${t1.max}`, '#1A7FA3', MARGIN, PAGE_W);
+  py = drawB1Table(doc, py, a, MARGIN, PAGE_W);
+  py += 4;
+
+  // page break logic
+  if (py > 260) { doc.addPage(); py = MARGIN + 8; pageBanner(doc, a, PAGE_W); py = 22; }
+
+  // --- B2: Mobility
+  py = drawDomainHeader(doc, py, '2 · Mobility Screen', `${t2.total}/${B2_MAX}`, '#0E6B7A', MARGIN, PAGE_W);
+  py = drawB2Table(doc, py, a, MARGIN, PAGE_W);
+  py += 4;
+
+  if (py > 240) { doc.addPage(); py = MARGIN + 8; pageBanner(doc, a, PAGE_W); py = 22; }
+
+  // --- B3: Wattbike
+  py = drawDomainHeader(doc, py, '3 · Wattbike 6-Min Pacing', t3.score === null ? '—' : `${t3.score}/${t3.max}`, '#C8960C', MARGIN, PAGE_W);
+  py = drawB3Block(doc, py, a, MARGIN, PAGE_W);
+  py += 4;
+
+  if (py > 230) { doc.addPage(); py = MARGIN + 8; pageBanner(doc, a, PAGE_W); py = 22; }
+
+  // --- B4: Time Standards
+  py = drawDomainHeader(doc, py, '4 · Time Standards', `${t4.total}/${t4.max}`, '#2D8659', MARGIN, PAGE_W);
+  py = drawB4Table(doc, py, a, MARGIN, PAGE_W);
+  py += 4;
+
+  if (py > 220) { doc.addPage(); py = MARGIN + 8; pageBanner(doc, a, PAGE_W); py = 22; }
+
+  // --- B5: Psychology
+  py = drawDomainHeader(doc, py, '5 · Psychology (Phase 2)', `${t5.total}/${t5.max}`, '#7C2D6B', MARGIN, PAGE_W);
+  py = drawB5Table(doc, py, a, MARGIN, PAGE_W);
+
+  // Footer last page
+  doc.setFontSize(7.5);
+  doc.setTextColor(140, 140, 150);
+  doc.text('Vision 2032 Combined Battery · SAQ National Talent ID', MARGIN, PAGE_H - 8);
+  doc.text(`Page ${doc.internal.getNumberOfPages()}`, PAGE_W - MARGIN, PAGE_H - 8, { align: 'right' });
+
+  const safeName = a.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+  doc.save(`Vision2032_${safeName}_${new Date().toISOString().slice(0,10)}.pdf`);
+}
+
+function pageBanner(doc, a, PAGE_W) {
+  doc.setFillColor(10, 35, 66);
+  doc.rect(0, 0, PAGE_W, 14, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`${a.name} — Detailed Scorecard`, 14, 9);
+  doc.setTextColor(200, 150, 12);
+  doc.setFontSize(8);
+  doc.text('SAQ VISION 2032', PAGE_W - 14, 9, { align: 'right' });
+}
+
+function hexToRgb(hex) {
+  hex = hex.replace('#','');
+  return [
+    parseInt(hex.substr(0,2),16),
+    parseInt(hex.substr(2,2),16),
+    parseInt(hex.substr(4,2),16)
+  ];
+}
+
+function drawDomainHeader(doc, y, label, scoreStr, color, MARGIN, PAGE_W) {
+  const rgb = hexToRgb(color);
+  doc.setFillColor(...rgb);
+  doc.rect(MARGIN, y, PAGE_W - 2*MARGIN, 8, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text(label, MARGIN + 3, y + 5.5);
+  doc.text(scoreStr, PAGE_W - MARGIN - 3, y + 5.5, { align: 'right' });
+  return y + 11;
+}
+
+function drawB1Table(doc, y, a, MARGIN, PAGE_W) {
+  // Compact table: test, raw value, score
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(85, 85, 102);
+  doc.text('TEST', MARGIN + 1, y + 4);
+  doc.text('RAW', MARGIN + 95, y + 4);
+  doc.text('SCORE', PAGE_W - MARGIN - 3, y + 4, { align: 'right' });
+  y += 6;
+  doc.setDrawColor(225, 228, 232);
+  doc.line(MARGIN, y, PAGE_W - MARGIN, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(26, 26, 46);
+  doc.setFontSize(8.5);
+  let idx = 0;
+  for (const test of B1_TESTS) {
+    if ((idx++) % 2 === 0) {
+      doc.setFillColor(248, 250, 252);
+      doc.rect(MARGIN, y, PAGE_W - 2*MARGIN, 6, 'F');
+    }
+    const r = a.b1[test.id] || {};
+    let raw = '—';
+    if (test.type === 'select') {
+      if (r.value != null) {
+        const opt = test.options.find(o => o.value == r.value);
+        raw = opt ? opt.label.split('—').slice(1).join('—').trim() : String(r.value);
+      }
+    } else {
+      const parts = [];
+      for (const f of test.fields) {
+        if (r[f.id] != null && r[f.id] !== '') parts.push(`${r[f.id]}`);
+      }
+      if (test.hasCannotFlag && r.cannot) parts.push('CANNOT');
+      raw = parts.length ? parts.join(' / ') : '—';
+    }
+    const score = b1TestScore(a, test);
+    doc.text(test.name, MARGIN + 1, y + 4);
+    doc.text(raw.substring(0, 35), MARGIN + 95, y + 4);
+    doc.text(score === null ? '—' : String(score), PAGE_W - MARGIN - 3, y + 4, { align: 'right' });
+    y += 6;
+  }
+  return y + 1;
+}
+
+function drawB2Table(doc, y, a, MARGIN, PAGE_W) {
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(85, 85, 102);
+  doc.text('TEST', MARGIN + 1, y + 4);
+  doc.text('LEFT', MARGIN + 80, y + 4);
+  doc.text('RIGHT', MARGIN + 105, y + 4);
+  doc.text('SCORE', PAGE_W - MARGIN - 3, y + 4, { align: 'right' });
+  y += 6;
+  doc.setDrawColor(225, 228, 232);
+  doc.line(MARGIN, y, PAGE_W - MARGIN, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(26, 26, 46);
+  doc.setFontSize(8.5);
+  let idx = 0;
+  for (const test of B2_TESTS) {
+    if ((idx++) % 2 === 0) {
+      doc.setFillColor(248, 250, 252);
+      doc.rect(MARGIN, y, PAGE_W - 2*MARGIN, 6, 'F');
+    }
+    const r = a.b2[test.id] || {};
+    const sL = b2TestSideScore(test, r.left);
+    const sR = b2TestSideScore(test, r.right);
+    const cardScore = (sL === null && sR === null) ? null : ((sL || 0) + (sR || 0));
+    doc.text(test.label, MARGIN + 1, y + 4);
+    doc.text(r.left != null && r.left !== '' ? `${r.left}${test.unit}` : '—', MARGIN + 80, y + 4);
+    doc.text(r.right != null && r.right !== '' ? `${r.right}${test.unit}` : '—', MARGIN + 105, y + 4);
+    doc.text(cardScore === null ? '—' : `${cardScore}/4`, PAGE_W - MARGIN - 3, y + 4, { align: 'right' });
+    y += 6;
+  }
+  return y + 1;
+}
+
+function drawB3Block(doc, y, a, MARGIN, PAGE_W) {
+  const result = b3Classify(a.b3.powers);
+  // Powers row
+  doc.setFontSize(8.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(85, 85, 102);
+  doc.text('MIN', MARGIN + 1, y + 4);
+  for (let i = 1; i <= 6; i++) {
+    doc.text(`0${i}`, MARGIN + 25 + (i-1)*23, y + 4, { align: 'center' });
+  }
+  doc.text('PATTERN', PAGE_W - MARGIN - 3, y + 4, { align: 'right' });
+  y += 6;
+  doc.setDrawColor(225, 228, 232);
+  doc.line(MARGIN, y, PAGE_W - MARGIN, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(26, 26, 46);
+  doc.text('Watts', MARGIN + 1, y + 5);
+  for (let i = 0; i < 6; i++) {
+    const v = a.b3.powers[i];
+    doc.text(v != null ? String(v) : '—', MARGIN + 25 + i*23, y + 5, { align: 'center' });
+  }
+  // pattern badge
+  if (result.complete) {
+    const patternColors = {
+      GREEN: [31,104,65], AMBER: [200,150,12], BLACK: [26,26,46], RED: [197,48,48]
+    };
+    const pc = patternColors[result.pattern];
+    doc.setFillColor(...pc);
+    doc.roundedRect(PAGE_W - MARGIN - 28, y, 28, 7, 1, 1, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.text(result.pattern, PAGE_W - MARGIN - 14, y + 5, { align: 'center' });
+  }
+  y += 9;
+  if (result.complete) {
+    doc.setFontSize(8);
+    doc.setTextColor(85, 85, 102);
+    doc.text(`mean ${result.mean.toFixed(0)}W  ·  CV ${result.cv.toFixed(1)}%  ·  slope ${result.slope >= 0 ? '+' : ''}${result.slope.toFixed(1)} W/min (${result.slopePct >= 0 ? '+' : ''}${result.slopePct.toFixed(1)}%/min)`, MARGIN + 1, y + 3);
+    y += 5;
+    doc.setTextColor(26, 26, 46);
+    doc.setFontSize(8.5);
+    const wrapped = doc.splitTextToSize(result.interp, PAGE_W - 2*MARGIN - 2);
+    doc.text(wrapped, MARGIN + 1, y + 3);
+    y += wrapped.length * 4 + 2;
+  } else {
+    doc.setFontSize(8.5);
+    doc.setTextColor(140, 140, 150);
+    doc.text('Pattern pending — enter all six minute-by-minute power values.', MARGIN + 1, y + 3);
+    y += 5;
+  }
+  return y;
+}
+
+function drawB4Table(doc, y, a, MARGIN, PAGE_W) {
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(85, 85, 102);
+  doc.text('EVENT', MARGIN + 1, y + 4);
+  doc.text('STANDARD', MARGIN + 65, y + 4);
+  doc.text('ATHLETE', MARGIN + 100, y + 4);
+  doc.text('DELTA', MARGIN + 135, y + 4);
+  doc.text('SCORE', PAGE_W - MARGIN - 3, y + 4, { align: 'right' });
+  y += 6;
+  doc.setDrawColor(225, 228, 232);
+  doc.line(MARGIN, y, PAGE_W - MARGIN, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  let idx = 0;
+  for (const ev of B4_EVENTS) {
+    if ((idx++) % 2 === 0) {
+      doc.setFillColor(248, 250, 252);
+      doc.rect(MARGIN, y, PAGE_W - 2*MARGIN, 6, 'F');
+    }
+    const std = b4EventStandard(a, ev);
+    const actual = timeToSeconds(a.b4[ev]);
+    const score = b4ScoreEvent(a, ev);
+    let deltaStr = '—';
+    if (std !== null && actual !== null) {
+      const d = actual - std;
+      deltaStr = `${d < 0 ? '−' : '+'}${Math.abs(d).toFixed(2)}s`;
+    }
+    doc.setTextColor(26, 26, 46);
+    doc.text(ev, MARGIN + 1, y + 4);
+    doc.text(std !== null ? secondsToTime(std) : '—', MARGIN + 65, y + 4);
+    doc.text(a.b4[ev] || '—', MARGIN + 100, y + 4);
+    if (std !== null && actual !== null) {
+      const d = actual - std;
+      doc.setTextColor(d < 0 ? 45 : 197, d < 0 ? 134 : 48, d < 0 ? 89 : 48);
+    }
+    doc.text(deltaStr, MARGIN + 135, y + 4);
+    doc.setTextColor(26, 26, 46);
+    doc.text(score === null ? '—' : String(score), PAGE_W - MARGIN - 3, y + 4, { align: 'right' });
+    y += 6;
+  }
+  return y + 1;
+}
+
+function drawB5Table(doc, y, a, MARGIN, PAGE_W) {
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(85, 85, 102);
+  doc.text('DOMAIN', MARGIN + 1, y + 4);
+  doc.text('SPEC', MARGIN + 95, y + 4, { align: 'center' });
+  doc.text('AWARE', MARGIN + 115, y + 4, { align: 'center' });
+  doc.text('AGENCY', MARGIN + 138, y + 4, { align: 'center' });
+  doc.text('TOTAL', PAGE_W - MARGIN - 3, y + 4, { align: 'right' });
+  y += 6;
+  doc.setDrawColor(225, 228, 232);
+  doc.line(MARGIN, y, PAGE_W - MARGIN, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  let idx = 0;
+  for (const d of B5_DOMAINS) {
+    if ((idx++) % 2 === 0) {
+      doc.setFillColor(248, 250, 252);
+      doc.rect(MARGIN, y, PAGE_W - 2*MARGIN, 6, 'F');
+    }
+    const sSpec = a.b5[`${d.id}_spec`];
+    const sAw = a.b5[`${d.id}_aware`];
+    const sAg = a.b5[`${d.id}_agency`];
+    const vals = [sSpec, sAw, sAg].filter(v => v !== undefined && v !== null && v !== '');
+    const tot = vals.reduce((acc, v) => acc + parseInt(v, 10), 0);
+    doc.setTextColor(26, 26, 46);
+    doc.text(d.title, MARGIN + 1, y + 4);
+    doc.text(sSpec == null || sSpec === '' ? '—' : String(sSpec), MARGIN + 95, y + 4, { align: 'center' });
+    doc.text(sAw == null || sAw === '' ? '—' : String(sAw), MARGIN + 115, y + 4, { align: 'center' });
+    doc.text(sAg == null || sAg === '' ? '—' : String(sAg), MARGIN + 138, y + 4, { align: 'center' });
+    doc.text(vals.length === 0 ? '—' : `${tot}/6`, PAGE_W - MARGIN - 3, y + 4, { align: 'right' });
+    y += 6;
+  }
+  // Append any notes (truncated)
+  const allNotes = B5_DOMAINS.map(d => {
+    const n = a.b5[`${d.id}_notes`];
+    return n && n.trim() ? `${d.title}: ${n.trim()}` : null;
+  }).filter(x => x);
+  if (allNotes.length) {
+    y += 2;
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(85, 85, 102);
+    doc.text('NOTES', MARGIN + 1, y + 4);
+    y += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.8);
+    doc.setTextColor(26, 26, 46);
+    for (const n of allNotes) {
+      const wrapped = doc.splitTextToSize(n, PAGE_W - 2*MARGIN - 2);
+      doc.text(wrapped, MARGIN + 1, y + 3);
+      y += wrapped.length * 3.5 + 1;
+    }
+  }
+  return y + 1;
+}
+
+/* ----------------------------------------------------------------------------
+   Spider chart → canvas → dataURL (for embedding in PDF)
+   We rebuild the spider using <canvas> at a high resolution.
+---------------------------------------------------------------------------- */
+function renderSpiderToDataURL(pcts, size) {
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  // White background (so PDF embeds cleanly)
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, size, size);
+  const cx = size/2;
+  const cy = size/2 + size*0.025;
+  const R = size * 0.32;
+  const n = DOMAIN_META.length;
+
+  // Background rings
+  ctx.lineWidth = 1;
+  for (const ring of [0.2, 0.4, 0.6, 0.8, 1.0]) {
+    ctx.beginPath();
+    for (let i = 0; i < n; i++) {
+      const angle = -Math.PI/2 + (i * 2*Math.PI / n);
+      const r = R * ring;
+      const x = cx + r*Math.cos(angle), y = cy + r*Math.sin(angle);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    if (ring === 1.0) {
+      ctx.fillStyle = 'rgba(244,246,248,0.5)';
+      ctx.fill();
+      ctx.strokeStyle = '#C0C6D0';
+      ctx.lineWidth = 1.5;
+    } else {
+      ctx.strokeStyle = '#D6DBE3';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 4]);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Spokes
+  ctx.strokeStyle = '#D6DBE3';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < n; i++) {
+    const angle = -Math.PI/2 + (i * 2*Math.PI / n);
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + R*Math.cos(angle), cy + R*Math.sin(angle));
+    ctx.stroke();
+  }
+
+  // Data polygon
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const angle = -Math.PI/2 + (i * 2*Math.PI / n);
+    const v = pcts[i] === null ? 0 : Math.max(0, Math.min(100, pcts[i])) / 100;
+    const r = R * v;
+    const x = cx + r*Math.cos(angle), y = cy + r*Math.sin(angle);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(26,127,163,0.30)';
+  ctx.fill();
+  ctx.strokeStyle = '#0A2342';
+  ctx.lineWidth = 2.4;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Data points
+  for (let i = 0; i < n; i++) {
+    const angle = -Math.PI/2 + (i * 2*Math.PI / n);
+    const v = pcts[i] === null ? 0 : Math.max(0, Math.min(100, pcts[i])) / 100;
+    const r = R * v;
+    const x = cx + r*Math.cos(angle), y = cy + r*Math.sin(angle);
+    ctx.beginPath();
+    ctx.arc(x, y, pcts[i] === null ? 4 : 6, 0, 2*Math.PI);
+    ctx.fillStyle = pcts[i] === null ? '#CCCCCC' : DOMAIN_META[i].color;
+    ctx.fill();
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+  }
+
+  // Labels (domain name + percentage)
+  ctx.font = 'bold 16px -apple-system, "Segoe UI", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  for (let i = 0; i < n; i++) {
+    const angle = -Math.PI/2 + (i * 2*Math.PI / n);
+    const labelR = R + size*0.085;
+    const x = cx + labelR*Math.cos(angle);
+    const y = cy + labelR*Math.sin(angle);
+    ctx.fillStyle = DOMAIN_META[i].color;
+    ctx.fillText(DOMAIN_META[i].label, x, y);
+    ctx.font = '600 13px ui-monospace, monospace';
+    ctx.fillStyle = '#555566';
+    ctx.fillText(pcts[i] === null ? '—' : pcts[i].toFixed(0) + '%', x, y + 16);
+    ctx.font = 'bold 16px -apple-system, "Segoe UI", sans-serif';
+  }
+
+  // Ring scale numbers
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.font = '500 10px ui-monospace, monospace';
+  ctx.fillStyle = '#9A9AA8';
+  for (const ring of [0.2, 0.4, 0.6, 0.8, 1.0]) {
+    ctx.fillText((ring * 100).toFixed(0), cx + 3, cy - R*ring + 1);
+  }
+
+  return canvas.toDataURL('image/png');
+}
+
+/* ============================================================================
+   INIT
+============================================================================ */
+loadState();
+renderRoster();
+renderActiveTab();
+
+</script>
+</body>
+</html>
