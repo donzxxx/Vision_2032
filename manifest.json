@@ -8,9 +8,9 @@
   "description": "Vision 2032 Mobility Scorecard Application.",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3208/3208712.png",
+      "src": "./G.jpeg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/jpeg",
       "purpose": "any maskable"
     }
   ]
