@@ -2504,5 +2504,28 @@ renderRoster();
 renderActiveTab();
 
 </script>
+ <script>
+         function checkPassword() {
+           var password = "Vision2032"; 
+           var passwordInput;
+
+           document.body.style.display = "none";
+
+           while (passwordInput !== password) {
+             passwordInput = prompt("Please enter the password to access the Mobility Scorecard:");
+             
+             if (passwordInput === null) {
+               document.write("<div style='text-align:center; margin-top:100px; font-family:sans-serif;'><h1>Access Denied</h1><p>You must enter a correct password to view this scorecard.</p></div>");
+               return;
+             }
+             
+             if (passwordInput !== password) {
+               alert("Incorrect password. Please try again.");
+             }
+           }
+           document.body.style.display = "block";
+         }
+         checkPassword();
+</script>
 </body>
 </html>
