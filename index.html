@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vision 2032 — Combined Battery of Tests</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+      <link rel="manifest" href="./manifest.json">
+      <script>
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('./service-worker.js')
+            .then(() => console.log('App Service Worker Registered'));
+        }
+      </script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
