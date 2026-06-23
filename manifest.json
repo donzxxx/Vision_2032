@@ -1,0 +1,17 @@
+{
+  "name": "Mobility Scorecard",
+  "short_name": "Mobility",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "description": "Vision 2032 Mobility Scorecard Application.",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3208/3208712.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
