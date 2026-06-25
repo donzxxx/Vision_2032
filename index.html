@@ -653,10 +653,10 @@ const B1_MAX = 15;
 // Combined: 8 × 4 = 32 raw. We display as percentage-normalised to keep scale comparable.
 // ============================================================================
 const B2_TESTS = [
-  { id: 'shoulderAbdIR', label: 'Shoulder Abd + IR', unit: '°', score: v => v >= 125 ? 2 : 0, asym: 10 },
+  { id: 'shoulderAbdIR', label: 'Shoulder Abduction + Internal Rotation', unit: '°', score: v => v >= 125 ? 2 : 0, asym: 10 },
   { id: 'combinedElevation', label: 'Combined Elevation', unit: '°', score: v => v >= 30 ? 2 : 0, asym: 5 },
-  { id: 'shoulderER', label: 'Shoulder ER', unit: '°', score: v => v >= 100 ? 2 : 0, asym: 10 },
-  { id: 'shoulderIR', label: 'Shoulder IR', unit: '°', score: v => v >= 50 ? 2 : 0, asym: 10 },
+  { id: 'shoulderER', label: 'Shoulder External Rotation', unit: '°', score: v => v >= 100 ? 2 : 0, asym: 10 },
+  { id: 'shoulderIR', label: 'Shoulder Internal Rotation', unit: '°', score: v => v >= 50 ? 2 : 0, asym: 10 },
   { id: 'thomas', label: 'Modified Thomas', unit: '°', score: v => v >= 0 ? 2 : 0, asym: 10 },
   { id: 'ankleVisual', label: 'Ankle Plantar Flexion', unit: '0–2', score: v => v === 2 ? 2 : 0, asym: 2, isPassFail: true },
   { id: 'wallAngel', label: 'Seated Wall Angel', unit: '/3', score: v => v >= 2 ? 2 : 0, asym: 1 },
